@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Estimator — Dashboard</title>
+<style>
+  :root{--ink:#17203a;--muted:#5b6478;--line:#d9deea;--bg:#f6f7fb;--green:#059669;--blue:#2563eb;--amber:#b45309}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  header{background:#111827;color:#fff;padding:20px 16px 16px}
+  header .in{max-width:920px;margin:0 auto}
+  h1{font-size:26px;margin:0}
+  .byline{color:#fbbf24;font-weight:700;font-size:13px;margin:3px 0 8px}
+  header p{color:#cbd5e1;font-size:14.5px;line-height:1.5;margin:0;max-width:760px}
+  header a{color:#93c5fd;font-weight:700}
+  .wrap{max-width:920px;margin:0 auto;padding:18px 16px 44px}
+  .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 14px}
+  .tile{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:12px 13px}
+  .tile .n{font-size:24px;font-weight:900}
+  .tile .k{font-size:12px;font-weight:800;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;margin-top:2px}
+  .tile .s{font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.4}
+  .card{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:16px;margin:0 0 14px}
+  .card h2{margin:0 0 3px;font-size:18px}
+  .card .sub{color:var(--muted);font-size:13.5px;margin:0 0 10px;line-height:1.5}
+  .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin:0 0 12px}
+  .controls label{font-weight:700;font-size:13px;display:block;margin:0 0 5px}
+  select,input{border:1.5px solid var(--line);border-radius:10px;padding:9px;font-size:14px;font-family:inherit;background:#fff}
+  button{appearance:none;border:0;border-radius:999px;background:var(--green);color:#fff;font-weight:800;font-size:14px;padding:10px 18px;cursor:pointer}
+  .chart{font-size:13px}
+  .crow{display:grid;grid-template-columns:190px 1fr 86px;gap:8px;align-items:center;margin:5px 0}
+  .crow .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .track{background:#eef1f7;border-radius:6px;height:16px;position:relative}
+  .fill{height:100%;border-radius:6px}
+  .pair{display:flex;height:16px;gap:2px}
+  .pair div{height:100%;border-radius:3px}
+  .val{font-weight:700;text-align:right}
+  .legend{font-size:12.5px;color:var(--muted);display:flex;gap:14px;margin:6px 0 2px}
+  .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+  .note{font-size:13px;color:var(--muted);line-height:1.5}
+  .big{font-size:19px;font-weight:900}
+  @media(max-width:760px){.tiles{grid-template-columns:1fr 1fr}.crow{grid-template-columns:120px 1fr 74px}}
+</style>
+</head>
+<body>
+<header><div class="in">
+  <h1>Token Estimator — Dashboard</h1>
+  <p class="byline">Built by Anahita Jacobsen · Live dashboard</p>
+  <p>The numbers on this page are not typed in. They are computed, in your browser, by the same engine as the code in this repo, every time the page loads. Change the volume and the charts move. The working tool is the <a href="./index.html">app</a>.</p>
+</div></header>
+<div class="wrap">
+  <div class="tiles">
+    <div class="tile"><div class="n" id="tModels"></div><div class="k">Models priced</div><div class="s">Frontier to pennies, editable defaults in the code.</div></div>
+    <div class="tile"><div class="n" id="tTypes"></div><div class="k">Task types</div><div class="s">Each predicts its own reply size.</div></div>
+    <div class="tile"><div class="n" id="tSap"></div><div class="k">SAP tasks</div><div class="s">The SAP &amp; Transformation edition, Run / Build / Transform.</div></div>
+    <div class="tile"><div class="n">10 / 10</div><div class="k">Proof checks</div><div class="s">JavaScript 4 + SAP 3 + Python 6, all passing. The ports agree value for value.</div></div>
+  </div>
+
+  <div class="card">
+    <h2>What the SAP edition costs, task by task</h2>
+    <p class="sub">Monthly cost of every SAP task at your volume, on two models. The gap between the bars is the model-routing argument, in one picture.</p>
+    <div class="controls">
+      <div><label for="vol">Runs per day (each task)</label><input id="vol" type="number" value="10" min="1" style="width:130px"></div>
+      <button id="recalc">Recalculate</button>
+    </div>
+    <div class="legend"><span><span class="dot" style="background:#2563eb"></span>GPT-6</span><span><span class="dot" style="background:#059669"></span>Claude Haiku 5.5</span></div>
+    <div class="chart" id="sapChart"></div>
+    <p class="note" id="sapTotal"></p>
+  </div>
+
+  <div class="card">
+    <h2>Model prices, input vs output</h2>
+    <p class="sub">Dollars per million tokens. Output is the expensive direction, 5x input on the frontier models. That asymmetry is why predicting the reply matters more than counting the prompt.</p>
+    <div class="legend"><span><span class="dot" style="background:#2563eb"></span>Input</span><span><span class="dot" style="background:#b45309"></span>Output</span></div>
+    <div class="chart" id="priceChart"></div>
+  </div>
+
+  <div class="card">
+    <h2>The headline comparison</h2>
+    <p class="sub">One reference task, every model: a 900-token incident summary, predicted reply included, at 10 runs a day.</p>
+    <div class="chart" id="refChart"></div>
+    <p class="note">Same work, same quality bar. The model choice is a budget decision, and it is the cheapest decision in the whole pipeline to make.</p>
+    <p><a href="./index.html"><b>Open the app →</b></a></p>
+  </div>
+
+  <p class="note">Status: public prototype. Counting is a calibrated heuristic; the production step is each model's real tokenizer, a one-function swap by design. Prices are editable defaults, verify against the provider before relying on a figure.</p>
+</div>
+
+<script>var module = { exports: {} };</script>
+<script>(function(){
+/**
+ * token-core.js — the engine of the Token Estimator app.
+ *
+ * Everything the app does comes from the functions in this file:
+ *   countTokens()     — how many tokens is this text?
+ *   analysePrompt()   — where do the tokens sit (system / context / history / question)?
+ *   estimateTask()    — what will a task cost, on each model, at volume?
+ *
+ * Read it top to bottom — it's written to be learned from.
+ * See LEARNING.md for the matching lessons.
+ */
+
+"use strict";
+
+// ---------------------------------------------------------------------------
+// 1. MODEL PROFILES
+// ---------------------------------------------------------------------------
+// Each model needs two things:
+//   charsPerToken — how its tokenizer slices text (a v1 heuristic, see
+//                   LEARNING.md Lesson 1). Prose in English averages ~4.
+//                   Code and JSON slice into more tokens, so their effective
+//                   chars-per-token is lower.
+//   inputPerMillion / outputPerMillion — price in USD per 1M tokens.
+//                   *** EDITABLE DEFAULTS — verify against the provider's
+//                   current pricing page before relying on any figure. ***
+// ---------------------------------------------------------------------------
+
+const MODELS = {
+  "gpt-6": {
+    label: "GPT-6 (frontier)",
+    charsPerToken: 4.0,
+    inputPerMillion: 5.0,
+    outputPerMillion: 25.0,
+  },
+  "claude-opus-5": {
+    label: "Claude Opus 5 (frontier)",
+    charsPerToken: 3.9,
+    inputPerMillion: 5.0,
+    outputPerMillion: 25.0,
+  },
+  "claude-haiku-5-5": {
+    label: "Claude Haiku 5.5 (fast/cheap)",
+    charsPerToken: 3.9,
+    inputPerMillion: 1.0,
+    outputPerMillion: 5.0,
+  },
+  "gemini-4-argon": {
+    label: "Gemini 4 Argon (frontier)",
+    charsPerToken: 4.1,
+    inputPerMillion: 4.0,
+    outputPerMillion: 20.0,
+  },
+  "mercury-3": {
+    label: "Mercury 3 (diffusion, speed)",
+    charsPerToken: 4.0,
+    inputPerMillion: 0.2, // price reported at launch, Oct 2026
+    outputPerMillion: 0.7,
+  },
+};
+
+// ---------------------------------------------------------------------------
+// 2. COUNTING
+// ---------------------------------------------------------------------------
+// v1 heuristic: tokens ≈ characters / charsPerToken, blended with a
+// word-based estimate (words / 0.75). Taking the average of the two is more
+// stable than either alone across prose, code and lists.
+// The production version replaces ONLY this function with the model's real
+// tokenizer — everything else in the app stays the same.
+// ---------------------------------------------------------------------------
+
+function countTokens(text, modelId) {
+  if (!text) return 0;
+  const model = MODELS[modelId] || MODELS["gpt-6"];
+  const byChars = text.length / model.charsPerToken;
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  const byWords = words / 0.75;
+  return Math.round((byChars + byWords) / 2);
+}
+
+// ---------------------------------------------------------------------------
+// 3. PROMPT ANATOMY
+// ---------------------------------------------------------------------------
+// A real prompt is not one blob. It's parts, and the parts behave very
+// differently: the question is usually tiny; the dragged-along context is
+// where the tokens (and the waste) live.
+// ---------------------------------------------------------------------------
+
+function analysePrompt(parts, modelId) {
+  // parts: { system, context, history, question } — any may be empty.
+  const result = {};
+  let total = 0;
+  for (const [name, text] of Object.entries(parts)) {
+    const tokens = countTokens(text || "", modelId);
+    result[name] = tokens;
+    total += tokens;
+  }
+  result.total = total;
+  // Percentages make the waste visible at a glance.
+  for (const name of Object.keys(parts)) {
+    result[name + "Pct"] = total ? Math.round((result[name] / total) * 100) : 0;
+  }
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// 4. TASK ESTIMATION
+// ---------------------------------------------------------------------------
+// You can count input tokens exactly. Output tokens you must PREDICT.
+// The honest way: ratios by task type, learned from real work.
+//   outputRatio — expected reply length as a share of input length.
+//   fixedOutput — for tasks whose reply is a set size (classification etc.)
+// These are starting defaults; the app replaces them with the user's own
+// history over time.
+// ---------------------------------------------------------------------------
+
+const TASK_TYPES = {
+  summarise: { label: "Summarise", outputRatio: 0.2, fixedOutput: 0 },
+  classify: { label: "Classify / label", outputRatio: 0, fixedOutput: 10 },
+  extract: { label: "Extract data", outputRatio: 0.3, fixedOutput: 0 },
+  draft: { label: "Draft / write", outputRatio: 1.5, fixedOutput: 0 },
+  code: { label: "Generate code", outputRatio: 2.0, fixedOutput: 0 },
+  chat: { label: "Chat reply", outputRatio: 0, fixedOutput: 300 },
+  translate: { label: "Translate", outputRatio: 1.0, fixedOutput: 0 },
+};
+
+function estimateTask({ inputTokens, taskType, modelId, runsPerDay = 1 }) {
+  const model = MODELS[modelId];
+  const task = TASK_TYPES[taskType] || TASK_TYPES.chat;
+  const outputTokens = task.fixedOutput
+    ? task.fixedOutput
+    : Math.round(inputTokens * task.outputRatio);
+
+  const costPerRun =
+    (inputTokens / 1e6) * model.inputPerMillion +
+    (outputTokens / 1e6) * model.outputPerMillion;
+
+  return {
+    model: model.label,
+    inputTokens,
+    outputTokens,
+    costPerRun,
+    costPerDay: costPerRun * runsPerDay,
+    costPerMonth: costPerRun * runsPerDay * 30,
+  };
+}
+
+// Compare one task across every model — the table the app shows.
+function compareModels(input) {
+  return Object.keys(MODELS).map((modelId) =>
+    estimateTask({ ...input, modelId })
+  );
+}
+
+// ---------------------------------------------------------------------------
+// 5. SAVINGS LEVERS
+// ---------------------------------------------------------------------------
+// Beyond compression, the big levers, as approximate saving ranges the app
+// can apply to an estimate so users can model "what if":
+//   promptCaching — resent static context (system prompt, reference docs)
+//                   is billed at a steep discount by major providers.
+//   modelRouting  — send easy steps to a small model, hard steps to frontier.
+//   leanFormat    — JSON carries structure characters; lists/CSV are leaner.
+// ---------------------------------------------------------------------------
+
+const SAVINGS_LEVERS = {
+  promptCaching: {
+    label: "Prompt caching for repeated context",
+    typicalSavingPct: "up to ~90% on the cached portion",
+  },
+  modelRouting: {
+    label: "Route easy steps to a small model",
+    typicalSavingPct: "~60–80% on the routed steps",
+  },
+  leanFormat: {
+    label: "Lean formats instead of JSON",
+    typicalSavingPct: "~20–40% on structured data",
+  },
+  fewerAgentSteps: {
+    label: "Fewer agent round-trips (context is resent every step)",
+    typicalSavingPct: "compounds — the deepest saving there is",
+  },
+};
+
+module.exports = {
+  MODELS,
+  TASK_TYPES,
+  SAVINGS_LEVERS,
+  countTokens,
+  analysePrompt,
+  estimateTask,
+  compareModels,
+};
+
+})();</script>
+<script>const core = module.exports; module = { exports: {} }; function require(p) { return core; }</script>
+<script>(function(){
+/**
+ * domain-sap.js — the SAP & Transformation edition of the Token Estimator.
+ *
+ * A domain edition is task intelligence: the real shapes of work in a domain,
+ * each with a typical input size, the engine task type that predicts its
+ * output, guidance, and the protection to apply before pasting anything into
+ * a model.
+ *
+ * This list (v2, 2026-11-08) was built from PUBLIC SAP work shapes only —
+ * the vocabulary of public SAP documentation and standard practice.
+ * No client input, no ticket content, no system data. It replaces v1,
+ * which was structured by copying the ServiceNow list and ruled wrong.
+ *
+ * Functional area (FI/CO, Procurement, Plan-to-Produce, SD, Supply Chain,
+ * Master Data, HR) is a TAG on a task at use time, not a separate list:
+ * the estimation shape of "summarise an incident" is the same in FI as in SD.
+ */
+
+"use strict";
+
+const { estimateTask } = require("./token-core");
+
+// protection: generic SAP hygiene — what to strip before pasting into a model.
+const STRIP =
+  "Strip system IDs, hostnames, user IDs and partner numbers before pasting.";
+const STRIP_DATA =
+  "Strip real material, customer and vendor numbers; keep the structure, lose the identifiers.";
+const STRIP_VALUES =
+  "Strip pricing, contract values and any export-controlled or personal data.";
+
+const SAP_TASKS = [
+  // ---- Run: SAP support work -------------------------------------------------
+  { id: "SAP-01", area: "Run", name: "Incident analysis summary", taskType: "summarise", typicalInputTokens: 900,
+    guidance: "Ask for cause, impact and next step as three separate lines.", protection: STRIP },
+  { id: "SAP-02", area: "Run", name: "Root cause & fix summary", taskType: "draft", typicalInputTokens: 1200,
+    guidance: "Give the model the timeline first; RCA quality follows chronology.", protection: STRIP },
+  { id: "SAP-03", area: "Run", name: "Customer update from work notes", taskType: "draft", typicalInputTokens: 500,
+    guidance: "Work notes are written for resolvers; ask for a rewrite, not a summary.", protection: STRIP },
+  { id: "SAP-04", area: "Run", name: "Enhancement request sizing summary", taskType: "extract", typicalInputTokens: 1000,
+    guidance: "Extract scope, effort drivers and risks as lists, not prose.", protection: STRIP_VALUES },
+  { id: "SAP-05", area: "Run", name: "Defect triage summary", taskType: "summarise", typicalInputTokens: 1600,
+    guidance: "Paste the defect list as a table; grouping quality doubles.", protection: STRIP },
+  { id: "SAP-06", area: "Run", name: "How-to guide from a resolved issue", taskType: "draft", typicalInputTokens: 800,
+    guidance: "Resolved once is an answer; written as a guide it is an asset.", protection: STRIP },
+
+  // ---- Build: SAP technical & design work ------------------------------------
+  { id: "SAP-07", area: "Build", name: "Functional specification draft", taskType: "draft", typicalInputTokens: 1500,
+    guidance: "Specify the output sections up front or the draft rambles.", protection: STRIP_DATA },
+  { id: "SAP-08", area: "Build", name: "Test script from a specification", taskType: "draft", typicalInputTokens: 1400,
+    guidance: "Ask for steps, data needs and expected results in columns.", protection: STRIP_DATA },
+  { id: "SAP-09", area: "Build", name: "Code review summary", taskType: "code", typicalInputTokens: 2500,
+    guidance: "Review in chunks by object; one giant paste loses the thread.", protection: STRIP },
+  { id: "SAP-10", area: "Build", name: "Interface mapping summary", taskType: "extract", typicalInputTokens: 1800,
+    guidance: "Mappings are tables; never let the model narrate them.", protection: STRIP_DATA },
+  { id: "SAP-11", area: "Build", name: "Role & authorisation impact summary", taskType: "classify", typicalInputTokens: 1100,
+    guidance: "Ask what changes, who is affected, what to test — in that order.", protection: STRIP },
+  { id: "SAP-12", area: "Build", name: "Report / data extraction specification", taskType: "extract", typicalInputTokens: 900,
+    guidance: "Name the output format in the prompt; it caps the reply size.", protection: STRIP_DATA },
+
+  // ---- Transform: programme & project work ------------------------------------
+  { id: "SAP-13", area: "Transform", name: "Fit-gap analysis summary", taskType: "summarise", typicalInputTokens: 2200,
+    guidance: "Requirements in, gaps out; keep the two lists visibly separate.", protection: STRIP_VALUES },
+  { id: "SAP-14", area: "Transform", name: "Process design narrative", taskType: "draft", typicalInputTokens: 1600,
+    guidance: "Give the model the process steps; it writes the story around them.", protection: STRIP_DATA },
+  { id: "SAP-15", area: "Transform", name: "Data migration mapping & cleansing summary", taskType: "extract", typicalInputTokens: 2400,
+    guidance: "Rules and exceptions as tables; sample rows anonymised.", protection: STRIP_DATA },
+  { id: "SAP-16", area: "Transform", name: "UAT evidence summary", taskType: "summarise", typicalInputTokens: 1800,
+    guidance: "Tested / passed / open, three counts before any narrative.", protection: STRIP },
+  { id: "SAP-17", area: "Transform", name: "Cutover readiness summary", taskType: "summarise", typicalInputTokens: 2000,
+    guidance: "Readiness by workstream, blockers named; no averages hiding a red.", protection: STRIP },
+  { id: "SAP-18", area: "Transform", name: "Stakeholder change communication", taskType: "draft", typicalInputTokens: 400,
+    guidance: "Small input, controlled output: give audience, date and the one action.", protection: STRIP_VALUES },
+  { id: "SAP-19", area: "Transform", name: "Steering pack narrative", taskType: "summarise", typicalInputTokens: 2600,
+    guidance: "Executives read the first three lines; spend your tokens there.", protection: STRIP_VALUES },
+  { id: "SAP-20", area: "Transform", name: "Hypercare daily report", taskType: "summarise", typicalInputTokens: 1500,
+    guidance: "Same shape every day; a fixed template is the cheapest prompt.", protection: STRIP },
+  { id: "SAP-21", area: "Transform", name: "Training FAQ draft", taskType: "draft", typicalInputTokens: 700,
+    guidance: "Draft from the questions users actually asked, not the manual.", protection: STRIP },
+];
+
+/**
+ * Estimate one SAP task on one model at a daily volume.
+ * Returns the task plus the engine's estimate row.
+ */
+function estimateSapTask(taskId, modelId = "gpt-6", runsPerDay = 10) {
+  const task = SAP_TASKS.find((t) => t.id === taskId);
+  if (!task) throw new Error("Unknown SAP task: " + taskId);
+  const estimate = estimateTask({
+    inputTokens: task.typicalInputTokens,
+    taskType: task.taskType,
+    modelId,
+    runsPerDay,
+  });
+  return { task, estimate };
+}
+
+module.exports = { SAP_TASKS, estimateSapTask };
+
+})();</script>
+<script>
+  const sap = module.exports;
+  document.getElementById('tModels').textContent = Object.keys(core.MODELS).length;
+  document.getElementById('tTypes').textContent = Object.keys(core.TASK_TYPES).length;
+  document.getElementById('tSap').textContent = sap.SAP_TASKS.length;
+
+  function bars(el, rows, max, colourFn, fmt) {
+    el.innerHTML = rows.map(r =>
+      '<div class="crow"><div class="nm">' + r.name + '</div><div class="track"><div class="pair">' +
+      r.segs.map((s, i) => '<div style="width:' + Math.max(0.5, (s / max) * 100) + '%;background:' + colourFn(i) + '"></div>').join('') +
+      '</div></div><div class="val">' + fmt(r) + '</div></div>').join('');
+  }
+
+  function sapChart() {
+    const vol = Math.max(1, parseInt(document.getElementById('vol').value || '1', 10));
+    const rows = sap.SAP_TASKS.map(t => {
+      const g = sap.estimateSapTask(t.id, 'gpt-6', vol).estimate.costPerMonth;
+      const h = sap.estimateSapTask(t.id, 'claude-haiku-5-5', vol).estimate.costPerMonth;
+      return { name: t.id + ' ' + t.name, segs: [g, h], g, h };
+    }).sort((a, b) => b.g - a.g);
+    const max = rows[0].g;
+    bars(document.getElementById('sapChart'), rows, max, i => i ? '#059669' : '#2563eb',
+      r => '$' + r.g.toFixed(2) + ' / $' + r.h.toFixed(2));
+    const tg = rows.reduce((s, r) => s + r.g, 0), th = rows.reduce((s, r) => s + r.h, 0);
+    document.getElementById('sapTotal').textContent =
+      'Whole edition at ' + vol + ' runs a day each: $' + tg.toFixed(2) + '/month on GPT-6 vs $' +
+      th.toFixed(2) + '/month on Haiku 5.5. Routing is worth $' + (tg - th).toFixed(2) + ' a month on this workload alone.';
+  }
+  document.getElementById('recalc').addEventListener('click', sapChart);
+  sapChart();
+
+  const priceRows = Object.values(core.MODELS).map(m => ({
+    name: m.label, segs: [m.inputPerMillion, m.outputPerMillion], i: m.inputPerMillion, o: m.outputPerMillion
+  }));
+  bars(document.getElementById('priceChart'), priceRows, 25, i => i ? '#b45309' : '#2563eb',
+    r => '$' + r.i.toFixed(2) + ' / $' + r.o.toFixed(2));
+
+  const ref = core.compareModels({ inputTokens: 900, taskType: 'summarise', runsPerDay: 10 })
+    .map(r => ({ name: r.model, segs: [r.costPerMonth], v: r.costPerMonth }))
+    .sort((a, b) => b.v - a.v);
+  bars(document.getElementById('refChart'), ref, ref[0].v, () => '#059669', r => '$' + r.v.toFixed(2) + '/mo');
+</script>
+</body>
+</html>
