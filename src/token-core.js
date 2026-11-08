@@ -31,6 +31,7 @@ const MODELS = {
     charsPerToken: 4.0,
     inputPerMillion: 5.0,
     outputPerMillion: 25.0,
+    tokenizer: "o200k_base", // exact counting available for this family
   },
   "claude-opus-5": {
     label: "Claude Opus 5 (frontier)",
@@ -68,13 +69,48 @@ const MODELS = {
 // tokenizer — everything else in the app stays the same.
 // ---------------------------------------------------------------------------
 
-function countTokens(text, modelId) {
+// ---------------------------------------------------------------------------
+// ACCURACY — read this before trusting a count (added 2026-11-08).
+// The heuristic below was measured against real tokenizers on a golden
+// set of ten texts (test/accuracy.mjs, ACCURACY.md). Verdict: fine on
+// short plain prose (±12%), but it overstates long prose by ~30% and
+// understates code, JSON and number-heavy text by 35–60%. A number that
+// wrong is not a count, it's a guess — so:
+//   * Models with a published tokenizer (the GPT family, o200k_base)
+//     can be counted EXACTLY once a real counter is wired in with
+//     setExactCounter() — the demo pages load one; Node users can pass
+//     gpt-tokenizer's encode. Exact beats estimated, always.
+//   * Models without a public tokenizer (Claude and others) stay
+//     estimates, labelled as such, with the measured error published.
+// ---------------------------------------------------------------------------
+
+let exactCounter = null;
+
+/** Wire in a real tokenizer: setExactCounter(text => encode(text).length). */
+function setExactCounter(fn) {
+  exactCounter = fn;
+}
+
+/** "exact" when a real tokenizer is wired for this model, else "estimate". */
+function countingMethod(modelId) {
+  const model = MODELS[modelId] || MODELS["gpt-6"];
+  return exactCounter && model.tokenizer ? "exact" : "estimate";
+}
+
+function countTokensHeuristic(text, modelId) {
   if (!text) return 0;
   const model = MODELS[modelId] || MODELS["gpt-6"];
   const byChars = text.length / model.charsPerToken;
   const words = text.trim().split(/\s+/).filter(Boolean).length;
   const byWords = words / 0.75;
   return Math.round((byChars + byWords) / 2);
+}
+
+function countTokens(text, modelId) {
+  if (!text) return 0;
+  const model = MODELS[modelId] || MODELS["gpt-6"];
+  if (exactCounter && model.tokenizer) return exactCounter(text);
+  return countTokensHeuristic(text, modelId);
 }
 
 // ---------------------------------------------------------------------------
@@ -186,6 +222,9 @@ module.exports = {
   TASK_TYPES,
   SAVINGS_LEVERS,
   countTokens,
+  countTokensHeuristic,
+  setExactCounter,
+  countingMethod,
   analysePrompt,
   estimateTask,
   compareModels,
