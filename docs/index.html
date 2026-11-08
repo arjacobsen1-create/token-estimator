@@ -36,7 +36,7 @@
 <div class="wrap">
   <h1>Token Estimator</h1>
   <p class="byline">Built by Anahita Jacobsen · Live demo</p>
-  <p class="lede">Paste a context and a question. The estimator counts the tokens, shows where they sit, predicts what the reply will cost, and prices the task on every model, at your volume. It runs entirely in your browser, on the same engine as the code in this repo (<i>src/token-core.js</i>). Prices are editable defaults in the code, verify them against the provider before relying on a figure.</p>
+  <p class="lede">Paste a context and a question. The estimator counts the tokens, shows where they sit, predicts what the reply will cost, and prices the task on every model, at your volume. It runs entirely in your browser, on the same engine as the code in this repo (<i>src/token-core.js</i>, inlined into this page). Prices are editable defaults in the code, verify them against the provider before relying on a figure.</p>
 
   <div class="card">
     <label for="ctx">Context (the document, the history, the stuff around the question)</label>
@@ -68,13 +68,335 @@
     <p class="note">On a flat subscription the marginal cost per run is $0, the plan is already paid; these dollars are API-equivalent, real charges for pay-per-token users. Either way the tokens are real: they burn allowance, limits and context window.</p>
   </div>
 
+
+  <div class="card">
+    <div class="total" style="font-size:17px">SAP &amp; Transformation edition</div>
+    <p class="note" style="margin-top:4px">The domain edition: 21 shapes of SAP work (Run, Build, Transform), each with a typical input size, guidance, and the protection to apply before pasting anything into a model. Built from public SAP work shapes only. The full list is SAP-TASKS.md in the repo.</p>
+    <label for="sapTask">SAP task</label>
+    <select id="sapTask"></select>
+    <div class="row">
+      <div>
+        <label for="sapModel">Model</label>
+        <select id="sapModel"></select>
+      </div>
+      <div>
+        <label for="sapRuns">Runs per day</label>
+        <input id="sapRuns" type="number" value="10" min="1">
+      </div>
+    </div>
+    <button id="sapGo">Estimate this SAP task</button>
+    <div id="sapOut" style="display:none;margin-top:12px">
+      <div class="total" id="sapLine" style="font-size:17px"></div>
+      <p class="note" id="sapGuide"></p>
+      <p class="note" id="sapProt"></p>
+    </div>
+  </div>
+
   <p class="note">Full code, lesson notes and a runnable proof (<i>node test/smoke.js</i>, 4 checks) are in the repository. Counting is a calibrated heuristic; the production step is each model's real tokenizer, a one-function swap by design.</p>
 </div>
 
 <script>var module = { exports: {} };</script>
-<script src="../src/token-core.js"></script>
+<script>(function(){
+/**
+ * token-core.js — the engine of the Token Estimator app.
+ *
+ * Everything the app does comes from the functions in this file:
+ *   countTokens()     — how many tokens is this text?
+ *   analysePrompt()   — where do the tokens sit (system / context / history / question)?
+ *   estimateTask()    — what will a task cost, on each model, at volume?
+ *
+ * Read it top to bottom — it's written to be learned from.
+ * See LEARNING.md for the matching lessons.
+ */
+
+"use strict";
+
+// ---------------------------------------------------------------------------
+// 1. MODEL PROFILES
+// ---------------------------------------------------------------------------
+// Each model needs two things:
+//   charsPerToken — how its tokenizer slices text (a v1 heuristic, see
+//                   LEARNING.md Lesson 1). Prose in English averages ~4.
+//                   Code and JSON slice into more tokens, so their effective
+//                   chars-per-token is lower.
+//   inputPerMillion / outputPerMillion — price in USD per 1M tokens.
+//                   *** EDITABLE DEFAULTS — verify against the provider's
+//                   current pricing page before relying on any figure. ***
+// ---------------------------------------------------------------------------
+
+const MODELS = {
+  "gpt-6": {
+    label: "GPT-6 (frontier)",
+    charsPerToken: 4.0,
+    inputPerMillion: 5.0,
+    outputPerMillion: 25.0,
+  },
+  "claude-opus-5": {
+    label: "Claude Opus 5 (frontier)",
+    charsPerToken: 3.9,
+    inputPerMillion: 5.0,
+    outputPerMillion: 25.0,
+  },
+  "claude-haiku-5-5": {
+    label: "Claude Haiku 5.5 (fast/cheap)",
+    charsPerToken: 3.9,
+    inputPerMillion: 1.0,
+    outputPerMillion: 5.0,
+  },
+  "gemini-4-argon": {
+    label: "Gemini 4 Argon (frontier)",
+    charsPerToken: 4.1,
+    inputPerMillion: 4.0,
+    outputPerMillion: 20.0,
+  },
+  "mercury-3": {
+    label: "Mercury 3 (diffusion, speed)",
+    charsPerToken: 4.0,
+    inputPerMillion: 0.2, // price reported at launch, Oct 2026
+    outputPerMillion: 0.7,
+  },
+};
+
+// ---------------------------------------------------------------------------
+// 2. COUNTING
+// ---------------------------------------------------------------------------
+// v1 heuristic: tokens ≈ characters / charsPerToken, blended with a
+// word-based estimate (words / 0.75). Taking the average of the two is more
+// stable than either alone across prose, code and lists.
+// The production version replaces ONLY this function with the model's real
+// tokenizer — everything else in the app stays the same.
+// ---------------------------------------------------------------------------
+
+function countTokens(text, modelId) {
+  if (!text) return 0;
+  const model = MODELS[modelId] || MODELS["gpt-6"];
+  const byChars = text.length / model.charsPerToken;
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  const byWords = words / 0.75;
+  return Math.round((byChars + byWords) / 2);
+}
+
+// ---------------------------------------------------------------------------
+// 3. PROMPT ANATOMY
+// ---------------------------------------------------------------------------
+// A real prompt is not one blob. It's parts, and the parts behave very
+// differently: the question is usually tiny; the dragged-along context is
+// where the tokens (and the waste) live.
+// ---------------------------------------------------------------------------
+
+function analysePrompt(parts, modelId) {
+  // parts: { system, context, history, question } — any may be empty.
+  const result = {};
+  let total = 0;
+  for (const [name, text] of Object.entries(parts)) {
+    const tokens = countTokens(text || "", modelId);
+    result[name] = tokens;
+    total += tokens;
+  }
+  result.total = total;
+  // Percentages make the waste visible at a glance.
+  for (const name of Object.keys(parts)) {
+    result[name + "Pct"] = total ? Math.round((result[name] / total) * 100) : 0;
+  }
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// 4. TASK ESTIMATION
+// ---------------------------------------------------------------------------
+// You can count input tokens exactly. Output tokens you must PREDICT.
+// The honest way: ratios by task type, learned from real work.
+//   outputRatio — expected reply length as a share of input length.
+//   fixedOutput — for tasks whose reply is a set size (classification etc.)
+// These are starting defaults; the app replaces them with the user's own
+// history over time.
+// ---------------------------------------------------------------------------
+
+const TASK_TYPES = {
+  summarise: { label: "Summarise", outputRatio: 0.2, fixedOutput: 0 },
+  classify: { label: "Classify / label", outputRatio: 0, fixedOutput: 10 },
+  extract: { label: "Extract data", outputRatio: 0.3, fixedOutput: 0 },
+  draft: { label: "Draft / write", outputRatio: 1.5, fixedOutput: 0 },
+  code: { label: "Generate code", outputRatio: 2.0, fixedOutput: 0 },
+  chat: { label: "Chat reply", outputRatio: 0, fixedOutput: 300 },
+  translate: { label: "Translate", outputRatio: 1.0, fixedOutput: 0 },
+};
+
+function estimateTask({ inputTokens, taskType, modelId, runsPerDay = 1 }) {
+  const model = MODELS[modelId];
+  const task = TASK_TYPES[taskType] || TASK_TYPES.chat;
+  const outputTokens = task.fixedOutput
+    ? task.fixedOutput
+    : Math.round(inputTokens * task.outputRatio);
+
+  const costPerRun =
+    (inputTokens / 1e6) * model.inputPerMillion +
+    (outputTokens / 1e6) * model.outputPerMillion;
+
+  return {
+    model: model.label,
+    inputTokens,
+    outputTokens,
+    costPerRun,
+    costPerDay: costPerRun * runsPerDay,
+    costPerMonth: costPerRun * runsPerDay * 30,
+  };
+}
+
+// Compare one task across every model — the table the app shows.
+function compareModels(input) {
+  return Object.keys(MODELS).map((modelId) =>
+    estimateTask({ ...input, modelId })
+  );
+}
+
+// ---------------------------------------------------------------------------
+// 5. SAVINGS LEVERS
+// ---------------------------------------------------------------------------
+// Beyond compression, the big levers, as approximate saving ranges the app
+// can apply to an estimate so users can model "what if":
+//   promptCaching — resent static context (system prompt, reference docs)
+//                   is billed at a steep discount by major providers.
+//   modelRouting  — send easy steps to a small model, hard steps to frontier.
+//   leanFormat    — JSON carries structure characters; lists/CSV are leaner.
+// ---------------------------------------------------------------------------
+
+const SAVINGS_LEVERS = {
+  promptCaching: {
+    label: "Prompt caching for repeated context",
+    typicalSavingPct: "up to ~90% on the cached portion",
+  },
+  modelRouting: {
+    label: "Route easy steps to a small model",
+    typicalSavingPct: "~60–80% on the routed steps",
+  },
+  leanFormat: {
+    label: "Lean formats instead of JSON",
+    typicalSavingPct: "~20–40% on structured data",
+  },
+  fewerAgentSteps: {
+    label: "Fewer agent round-trips (context is resent every step)",
+    typicalSavingPct: "compounds — the deepest saving there is",
+  },
+};
+
+module.exports = {
+  MODELS,
+  TASK_TYPES,
+  SAVINGS_LEVERS,
+  countTokens,
+  analysePrompt,
+  estimateTask,
+  compareModels,
+};
+
+})();</script>
 <script>
   const core = module.exports;
+</script>
+<script>var module = { exports: {} }; function require(p) { return core; }</script>
+<script>(function(){
+/**
+ * domain-sap.js — the SAP & Transformation edition of the Token Estimator.
+ *
+ * A domain edition is task intelligence: the real shapes of work in a domain,
+ * each with a typical input size, the engine task type that predicts its
+ * output, guidance, and the protection to apply before pasting anything into
+ * a model.
+ *
+ * This list (v2, 2026-11-08) was built from PUBLIC SAP work shapes only —
+ * the vocabulary of public SAP documentation and standard practice.
+ * No client input, no ticket content, no system data. It replaces v1,
+ * which was structured by copying the ServiceNow list and ruled wrong.
+ *
+ * Functional area (FI/CO, Procurement, Plan-to-Produce, SD, Supply Chain,
+ * Master Data, HR) is a TAG on a task at use time, not a separate list:
+ * the estimation shape of "summarise an incident" is the same in FI as in SD.
+ */
+
+"use strict";
+
+const { estimateTask } = require("./token-core");
+
+// protection: generic SAP hygiene — what to strip before pasting into a model.
+const STRIP =
+  "Strip system IDs, hostnames, user IDs and partner numbers before pasting.";
+const STRIP_DATA =
+  "Strip real material, customer and vendor numbers; keep the structure, lose the identifiers.";
+const STRIP_VALUES =
+  "Strip pricing, contract values and any export-controlled or personal data.";
+
+const SAP_TASKS = [
+  // ---- Run: SAP support work -------------------------------------------------
+  { id: "SAP-01", area: "Run", name: "Incident analysis summary", taskType: "summarise", typicalInputTokens: 900,
+    guidance: "Ask for cause, impact and next step as three separate lines.", protection: STRIP },
+  { id: "SAP-02", area: "Run", name: "Root cause & fix summary", taskType: "draft", typicalInputTokens: 1200,
+    guidance: "Give the model the timeline first; RCA quality follows chronology.", protection: STRIP },
+  { id: "SAP-03", area: "Run", name: "Customer update from work notes", taskType: "draft", typicalInputTokens: 500,
+    guidance: "Work notes are written for resolvers; ask for a rewrite, not a summary.", protection: STRIP },
+  { id: "SAP-04", area: "Run", name: "Enhancement request sizing summary", taskType: "extract", typicalInputTokens: 1000,
+    guidance: "Extract scope, effort drivers and risks as lists, not prose.", protection: STRIP_VALUES },
+  { id: "SAP-05", area: "Run", name: "Defect triage summary", taskType: "summarise", typicalInputTokens: 1600,
+    guidance: "Paste the defect list as a table; grouping quality doubles.", protection: STRIP },
+  { id: "SAP-06", area: "Run", name: "How-to guide from a resolved issue", taskType: "draft", typicalInputTokens: 800,
+    guidance: "Resolved once is an answer; written as a guide it is an asset.", protection: STRIP },
+
+  // ---- Build: SAP technical & design work ------------------------------------
+  { id: "SAP-07", area: "Build", name: "Functional specification draft", taskType: "draft", typicalInputTokens: 1500,
+    guidance: "Specify the output sections up front or the draft rambles.", protection: STRIP_DATA },
+  { id: "SAP-08", area: "Build", name: "Test script from a specification", taskType: "draft", typicalInputTokens: 1400,
+    guidance: "Ask for steps, data needs and expected results in columns.", protection: STRIP_DATA },
+  { id: "SAP-09", area: "Build", name: "Code review summary", taskType: "code", typicalInputTokens: 2500,
+    guidance: "Review in chunks by object; one giant paste loses the thread.", protection: STRIP },
+  { id: "SAP-10", area: "Build", name: "Interface mapping summary", taskType: "extract", typicalInputTokens: 1800,
+    guidance: "Mappings are tables; never let the model narrate them.", protection: STRIP_DATA },
+  { id: "SAP-11", area: "Build", name: "Role & authorisation impact summary", taskType: "classify", typicalInputTokens: 1100,
+    guidance: "Ask what changes, who is affected, what to test — in that order.", protection: STRIP },
+  { id: "SAP-12", area: "Build", name: "Report / data extraction specification", taskType: "extract", typicalInputTokens: 900,
+    guidance: "Name the output format in the prompt; it caps the reply size.", protection: STRIP_DATA },
+
+  // ---- Transform: programme & project work ------------------------------------
+  { id: "SAP-13", area: "Transform", name: "Fit-gap analysis summary", taskType: "summarise", typicalInputTokens: 2200,
+    guidance: "Requirements in, gaps out; keep the two lists visibly separate.", protection: STRIP_VALUES },
+  { id: "SAP-14", area: "Transform", name: "Process design narrative", taskType: "draft", typicalInputTokens: 1600,
+    guidance: "Give the model the process steps; it writes the story around them.", protection: STRIP_DATA },
+  { id: "SAP-15", area: "Transform", name: "Data migration mapping & cleansing summary", taskType: "extract", typicalInputTokens: 2400,
+    guidance: "Rules and exceptions as tables; sample rows anonymised.", protection: STRIP_DATA },
+  { id: "SAP-16", area: "Transform", name: "UAT evidence summary", taskType: "summarise", typicalInputTokens: 1800,
+    guidance: "Tested / passed / open, three counts before any narrative.", protection: STRIP },
+  { id: "SAP-17", area: "Transform", name: "Cutover readiness summary", taskType: "summarise", typicalInputTokens: 2000,
+    guidance: "Readiness by workstream, blockers named; no averages hiding a red.", protection: STRIP },
+  { id: "SAP-18", area: "Transform", name: "Stakeholder change communication", taskType: "draft", typicalInputTokens: 400,
+    guidance: "Small input, controlled output: give audience, date and the one action.", protection: STRIP_VALUES },
+  { id: "SAP-19", area: "Transform", name: "Steering pack narrative", taskType: "summarise", typicalInputTokens: 2600,
+    guidance: "Executives read the first three lines; spend your tokens there.", protection: STRIP_VALUES },
+  { id: "SAP-20", area: "Transform", name: "Hypercare daily report", taskType: "summarise", typicalInputTokens: 1500,
+    guidance: "Same shape every day; a fixed template is the cheapest prompt.", protection: STRIP },
+  { id: "SAP-21", area: "Transform", name: "Training FAQ draft", taskType: "draft", typicalInputTokens: 700,
+    guidance: "Draft from the questions users actually asked, not the manual.", protection: STRIP },
+];
+
+/**
+ * Estimate one SAP task on one model at a daily volume.
+ * Returns the task plus the engine's estimate row.
+ */
+function estimateSapTask(taskId, modelId = "gpt-6", runsPerDay = 10) {
+  const task = SAP_TASKS.find((t) => t.id === taskId);
+  if (!task) throw new Error("Unknown SAP task: " + taskId);
+  const estimate = estimateTask({
+    inputTokens: task.typicalInputTokens,
+    taskType: task.taskType,
+    modelId,
+    runsPerDay,
+  });
+  return { task, estimate };
+}
+
+module.exports = { SAP_TASKS, estimateSapTask };
+
+})();</script>
+<script>
+  const sap = module.exports;
   const taskSel = document.getElementById('task');
   Object.keys(core.TASK_TYPES).forEach(k => {
     const o = document.createElement('option');
@@ -112,7 +434,32 @@
       r.costPerRun.toFixed(4) + '</td><td>$' + r.costPerMonth.toFixed(2) + '</td></tr>').join('');
     document.getElementById('out').style.display = 'block';
   });
+
+  const sapSel = document.getElementById('sapTask');
+  sap.SAP_TASKS.forEach(tk => {
+    const o = document.createElement('option');
+    o.value = tk.id; o.textContent = tk.id + ' · ' + tk.area + ' — ' + tk.name;
+    sapSel.appendChild(o);
+  });
+  const sapModelSel = document.getElementById('sapModel');
+  Object.keys(core.MODELS).forEach(k => {
+    const o = document.createElement('option');
+    o.value = k; o.textContent = core.MODELS[k].label || k;
+    sapModelSel.appendChild(o);
+  });
+  document.getElementById('sapGo').addEventListener('click', () => {
+    const runs = Math.max(1, parseInt(document.getElementById('sapRuns').value || '1', 10));
+    const r = sap.estimateSapTask(sapSel.value, sapModelSel.value, runs);
+    document.getElementById('sapLine').textContent =
+      r.task.name + ': ~' + r.task.typicalInputTokens.toLocaleString() + ' in / ' +
+      r.estimate.outputTokens + ' predicted out · $' + r.estimate.costPerRun.toFixed(4) +
+      '/run · $' + r.estimate.costPerMonth.toFixed(2) + '/month at ' + runs + '/day';
+    document.getElementById('sapGuide').textContent = 'Guidance: ' + r.task.guidance;
+    document.getElementById('sapProt').textContent = 'Protection: ' + r.task.protection;
+    document.getElementById('sapOut').style.display = 'block';
+  });
   document.getElementById('go').click();
+  document.getElementById('sapGo').click();
 </script>
 </body>
 </html>
