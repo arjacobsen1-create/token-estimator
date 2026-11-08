@@ -83,7 +83,7 @@
     <p><a href="./index.html"><b>Open the app →</b></a></p>
   </div>
 
-  <p class="note">Status: public prototype. Counting is a calibrated heuristic; the production step is each model's real tokenizer, a one-function swap by design. Prices are editable defaults, verify against the provider before relying on a figure.</p>
+  <p class="note">Status: public prototype. GPT-family counts are exact once the real tokenizer loads (see the note in the header); other models are estimates with measured errors published in ACCURACY.md in the repo. Prices are editable defaults, verify against the provider before relying on a figure.</p>
 </div>
 
 <script>var module = { exports: {} };</script>
@@ -121,6 +121,7 @@ const MODELS = {
     charsPerToken: 4.0,
     inputPerMillion: 5.0,
     outputPerMillion: 25.0,
+    tokenizer: "o200k_base", // exact counting available for this family
   },
   "claude-opus-5": {
     label: "Claude Opus 5 (frontier)",
@@ -158,13 +159,48 @@ const MODELS = {
 // tokenizer — everything else in the app stays the same.
 // ---------------------------------------------------------------------------
 
-function countTokens(text, modelId) {
+// ---------------------------------------------------------------------------
+// ACCURACY — read this before trusting a count (added 2026-11-08).
+// The heuristic below was measured against real tokenizers on a golden
+// set of ten texts (test/accuracy.mjs, ACCURACY.md). Verdict: fine on
+// short plain prose (±12%), but it overstates long prose by ~30% and
+// understates code, JSON and number-heavy text by 35–60%. A number that
+// wrong is not a count, it's a guess — so:
+//   * Models with a published tokenizer (the GPT family, o200k_base)
+//     can be counted EXACTLY once a real counter is wired in with
+//     setExactCounter() — the demo pages load one; Node users can pass
+//     gpt-tokenizer's encode. Exact beats estimated, always.
+//   * Models without a public tokenizer (Claude and others) stay
+//     estimates, labelled as such, with the measured error published.
+// ---------------------------------------------------------------------------
+
+let exactCounter = null;
+
+/** Wire in a real tokenizer: setExactCounter(text => encode(text).length). */
+function setExactCounter(fn) {
+  exactCounter = fn;
+}
+
+/** "exact" when a real tokenizer is wired for this model, else "estimate". */
+function countingMethod(modelId) {
+  const model = MODELS[modelId] || MODELS["gpt-6"];
+  return exactCounter && model.tokenizer ? "exact" : "estimate";
+}
+
+function countTokensHeuristic(text, modelId) {
   if (!text) return 0;
   const model = MODELS[modelId] || MODELS["gpt-6"];
   const byChars = text.length / model.charsPerToken;
   const words = text.trim().split(/\s+/).filter(Boolean).length;
   const byWords = words / 0.75;
   return Math.round((byChars + byWords) / 2);
+}
+
+function countTokens(text, modelId) {
+  if (!text) return 0;
+  const model = MODELS[modelId] || MODELS["gpt-6"];
+  if (exactCounter && model.tokenizer) return exactCounter(text);
+  return countTokensHeuristic(text, modelId);
 }
 
 // ---------------------------------------------------------------------------
@@ -276,6 +312,9 @@ module.exports = {
   TASK_TYPES,
   SAVINGS_LEVERS,
   countTokens,
+  countTokensHeuristic,
+  setExactCounter,
+  countingMethod,
   analysePrompt,
   estimateTask,
   compareModels,
@@ -424,6 +463,28 @@ module.exports = { SAP_TASKS, estimateSapTask };
     .map(r => ({ name: r.model, segs: [r.costPerMonth], v: r.costPerMonth }))
     .sort((a, b) => b.v - a.v);
   bars(document.getElementById('refChart'), ref, ref[0].v, () => '#059669', r => '$' + r.v.toFixed(2) + '/mo');
+
+  window.__refresh = function () { sapChart(); };
+</script>
+
+<script>
+  // Load the REAL o200k_base tokenizer (GPT family) and wire it into the
+  // engine. If it loads, GPT counts on this page are exact, not estimated.
+  (function () {
+    var note = document.createElement('p');
+    note.className = 'note'; note.style.marginTop = '10px'; note.style.color = '#fbbf24';
+    note.textContent = 'Counting: loading the real tokenizer…';
+    document.querySelector('header .in').appendChild(note);
+    import('https://unpkg.com/gpt-tokenizer@4.1.0/esm/encoding/o200k_base.js')
+      .then(function (m) {
+        core.setExactCounter(function (t) { return m.encode(t).length; });
+        note.textContent = 'Counting: GPT models use the real o200k_base tokenizer — exact. Other models are estimates; measured errors are published in ACCURACY.md in the repo.';
+        if (window.__refresh) window.__refresh();
+      })
+      .catch(function () {
+        note.textContent = 'Counting: estimates (the real tokenizer could not be loaded). Measured errors are published in ACCURACY.md in the repo.';
+      });
+  })();
 </script>
 </body>
 </html>
