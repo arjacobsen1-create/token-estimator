@@ -69,6 +69,14 @@ node src/sap-demo.js      the whole edition, priced on two models
 node test/sap-edition.js  the proof the edition is sound (3 checks)
 ```
 
+## Accuracy
+
+Counts are not taken on faith. The counter is measured against the real
+tokenizers on a golden set, the errors are published in
+[ACCURACY.md](ACCURACY.md), GPT-family counts go exact when a real
+tokenizer is wired in (the live demo loads one), and every other count
+is labelled an estimate with its measured error.
+
 ## Live demo
 
 **https://arjacobsen1-create.github.io/token-estimator/** — the app running in your browser, on the same engine as `src/`.

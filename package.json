@@ -1,1 +1,15 @@
-{"description":"Estimate token counts and cost for AI tasks — and minimise them.","license":"UNLICENSED","name":"token-estimator","private":true,"scripts":{"demo":"node src/demo.js"},"type":"commonjs","version":"0.1.0"}
+{
+  "description": "Estimate token counts and cost for AI tasks \u2014 and minimise them.",
+  "license": "UNLICENSED",
+  "name": "token-estimator",
+  "private": true,
+  "scripts": {
+    "demo": "node src/demo.js",
+    "accuracy": "node test/accuracy.mjs"
+  },
+  "type": "commonjs",
+  "version": "0.1.0",
+  "devDependencies": {
+    "gpt-tokenizer": "^4.1.0"
+  }
+}
