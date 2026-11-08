@@ -5,26 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Token Estimator — App</title>
 <style>
-  :root{--ink:#17203a;--muted:#5b6478;--line:#d9deea;--bg:#f6f7fb;--green:#059669;--amber:#b45309;--purple:#7c3aed}
+  :root{--ink:#1c1a15;--muted:#5b6478;--line:#ddd3ba;--bg:#f6f1e7;--green:#059669;--amber:#b45309;--purple:#7c3aed}
   *{box-sizing:border-box}
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-  header{background:#111827;color:#fff;padding:20px 16px 16px}
+  header{background:#141310;color:#fff;padding:20px 16px 16px}
   header .in{max-width:920px;margin:0 auto}
   h1{font-size:26px;margin:0}
-  .byline{color:#fbbf24;font-weight:700;font-size:13px;margin:3px 0 8px}
+  .byline{color:#fb923c;font-weight:700;font-size:13px;margin:3px 0 8px}
   header p{color:#cbd5e1;font-size:14.5px;line-height:1.5;margin:0;max-width:760px}
   .wrap{max-width:920px;margin:0 auto;padding:18px 16px 44px}
   .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 14px}
-  .step{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;font-size:13.5px;line-height:1.45}
-  .step b{color:var(--green)}
-  .card{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:16px;margin:0 0 14px}
+  .step{background:#fffdf6;border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;font-size:13.5px;line-height:1.45}
+  .step b{color:#ea580c}
+  .card{background:#fffdf6;border:1.5px solid var(--line);border-radius:14px;padding:16px;margin:0 0 14px}
   .card h2{margin:0 0 3px;font-size:18px}
   .card .sub{color:var(--muted);font-size:13.5px;margin:0 0 8px;line-height:1.5}
   label{font-weight:700;font-size:13px;display:block;margin:10px 0 5px}
   textarea,input,select{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px;font-size:14.5px;font-family:inherit;background:#fff}
   textarea{min-height:80px;resize:vertical}
   .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  button{appearance:none;border:0;border-radius:999px;background:var(--green);color:#fff;font-weight:800;font-size:15px;padding:12px 20px;cursor:pointer;margin-top:14px}
+  button{appearance:none;border:0;border-radius:999px;background:#ea580c;color:#fff;font-weight:800;font-size:15px;padding:12px 20px;cursor:pointer;margin-top:14px}
   .bar{display:flex;height:20px;border-radius:999px;overflow:hidden;border:1px solid var(--line);margin:8px 0 4px}
   .bar div{height:100%}
   .legend{font-size:13px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap}
@@ -33,7 +33,7 @@
   th,td{text-align:right;padding:8px 6px;border-bottom:1px solid var(--line)}
   th:first-child,td:first-child{text-align:left}
   .total{font-size:19px;font-weight:900;margin-top:12px}
-  .pick{background:#ecfdf5;border:1.5px solid #a7f3d0;border-radius:12px;padding:12px;margin-top:12px;font-size:14.5px;line-height:1.55}
+  .pick{background:#f2f7e4;border:1.5px solid #b5cc7e;border-radius:12px;padding:12px;margin-top:12px;font-size:14.5px;line-height:1.55}
   .runner{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px;font-size:14px;line-height:1.55}
   .note{font-size:13px;color:var(--muted);line-height:1.5}
   @media(max-width:640px){.steps{grid-template-columns:1fr}.row{grid-template-columns:1fr}}
@@ -655,7 +655,7 @@ module.exports = { SAP_TASKS, estimateSapTask };
     if (k === 'summarise') o.selected = true;
     taskSel.appendChild(o);
   });
-  const colours = { system:'#7c3aed', context:'#2563eb', history:'#ea580c', question:'#059669' };
+  const colours = { system:'#141310', context:'#ea580c', history:'#a8a29e', question:'#65a30d' };
   document.getElementById('go').addEventListener('click', () => {
     const parts = {
       system: 'You are a helpful assistant for a supply chain team. Answer in a professional tone. Always be concise.',
