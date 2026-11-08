@@ -468,7 +468,7 @@ const SAP_TASKS = [
     guidance: "Review in chunks by object; one giant paste loses the thread.", protection: STRIP },
   { id: "SAP-10", area: "Build", name: "Interface mapping summary", taskType: "extract", typicalInputTokens: 1800,
     guidance: "Mappings are tables; never let the model narrate them.", protection: STRIP_DATA },
-  { id: "SAP-11", area: "Build", name: "Role & authorisation impact summary", taskType: "classify", typicalInputTokens: 1100,
+  { id: "SAP-11", area: "Build", name: "Role & authorisation impact summary", taskType: "extract", typicalInputTokens: 1100,
     guidance: "Ask what changes, who is affected, what to test — in that order.", protection: STRIP },
   { id: "SAP-12", area: "Build", name: "Report / data extraction specification", taskType: "extract", typicalInputTokens: 900,
     guidance: "Name the output format in the prompt; it caps the reply size.", protection: STRIP_DATA },
