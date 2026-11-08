@@ -1,0 +1,54 @@
+# Token Estimator
+
+An app that estimates how many tokens an AI task will use — and helps you use fewer.
+
+You paste a prompt (or describe a task), and it tells you:
+
+1. **How many tokens** the input is, per model
+2. **Where they sit** — system prompt vs. context vs. history vs. your actual question
+3. **What the reply will probably cost** — predicted output tokens by task type
+4. **What it costs at volume** — per run, per day, per month, per model
+
+## Why
+
+Tokens are the meter running underneath every AI product. The next decade of AI
+economics is about token minimising: doing the same work for fewer tokens.
+This app makes the meter visible.
+
+## Project layout
+
+```
+src/
+  token-core.js      The engine: counting, anatomy, estimation.
+                     Heavily commented — this is the file to learn from.
+  model-suggester.js "What to use for what": a task-to-model recommender
+                     (trait table + task weights + scoring). Also commented.
+  demo.js            Run it:  node src/demo.js
+  suggest-demo.js    Run it:  node src/suggest-demo.js
+LEARNING.md          Lesson notes. Start here if you're learning to code this.
+```
+
+## Running it
+
+You need Node.js (v18+). No dependencies for the core demo.
+
+```bash
+node src/demo.js
+```
+
+## Status
+
+Private project, in development. A working prototype also exists as a web app;
+this repo is the real codebase that will be packaged for the App Store.
+
+## A note on prices
+
+Model prices in `src/token-core.js` are editable defaults, marked as such.
+Always verify against the provider's current pricing page before relying on
+a cost figure — prices change often.
+
+## A note on counting
+
+Version 1 counts tokens with a calibrated heuristic (see LEARNING.md, Lesson 1).
+The production step is swapping in each model's real tokenizer — that's
+Lesson 2, and the code is shaped so the swap is one function.

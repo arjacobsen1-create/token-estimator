@@ -1,0 +1,1 @@
+{"description":"Estimate token counts and cost for AI tasks — and minimise them.","license":"UNLICENSED","name":"token-estimator","private":true,"scripts":{"demo":"node src/demo.js"},"type":"commonjs","version":"0.1.0"}
