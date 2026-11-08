@@ -93,6 +93,7 @@
   .warnbox.show{display:block}
   .subline{display:block;font-size:12px;color:var(--muted);margin-top:2px}
   tr.mode{cursor:pointer}
+  #rowBase,#rowOpt{cursor:pointer}
   .wfcrow{display:grid;grid-template-columns:64px 1fr 92px;gap:8px;align-items:center;margin:4px 0;font-size:12.5px}
   .chk{display:flex;gap:8px;align-items:center;margin-top:14px;font-size:13px;color:var(--muted);font-weight:600}
   .chk input{width:auto;accent-color:var(--cyan)}
@@ -1002,6 +1003,8 @@ module.exports = { SAP_TASKS, estimateSapTask };
   $('volRange').addEventListener('input', () => { $('vol').value = $('volRange').value; draw(); });
   $('days').addEventListener('change', draw);
   $('routing').addEventListener('change', draw);
+  $('rowBase').addEventListener('click', () => { $('routing').value = 'baseline'; draw(); });
+  $('rowOpt').addEventListener('click', () => { $('routing').value = 'optimised'; draw(); });
   draw();
   window.__refresh = draw;
 </script>
