@@ -77,6 +77,46 @@ tokenizers on a golden set, the errors are published in
 tokenizer is wired in (the live demo loads one), and every other count
 is labelled an estimate with its measured error.
 
+
+## What this measures, and what it doesn't
+
+**It measures**
+
+- **Input tokens** — the material handed to the model, counted. Exact for GPT
+  models when the real o200k_base tokenizer is wired in (the live demo loads
+  one); labelled estimates for other models, with the measured error published
+  in ACCURACY.md.
+- **Predicted output tokens** — forecast from the type of task (summarise
+  ~0.2x the input, extract ~0.3x, draft ~1.5x, code ~2x, classify a fixed
+  short label). A forecast, not a meter reading.
+- **Cost** — input plus predicted output, at the selected model's price, at
+  your volume. Prices are editable defaults; verify before relying on a figure.
+- **For the SAP & Transformation edition** — 21 generic shapes of SAP work
+  with typical input sizes, published in SAP-TASKS.md. Built from public SAP
+  work shapes only: no client data, no system data.
+
+**It doesn't measure**
+
+- **Quality.** A cheaper run is not a better run; nothing here scores the answer.
+- **Actual consumption.** Only a metered bill or platform telemetry proves
+  what a workload really used.
+- **Vendor consumption units** (SAP AI Units and the like). Vendors set
+  conversion rates per scenario; this measures the token driver underneath,
+  which is what every basis converts from.
+- **Business value.** Whether a task was worth doing at all stays a human decision.
+
+**If you pay a flat subscription**, read the dollar figures as an
+API-equivalent yardstick: they size and compare workloads and show what burns
+the allowance you already bought. **If you pay per token or in consumption
+units**, they are a direct forecast.
+
+**Channel note.** The tool prices the work, not the channel. Joule, Joule
+Studio skills, in-tenant agents, third-party plugins and direct APIs all
+consume the same tokens. Governance differs sharply by channel — Joule runs
+inside the tenant under the user's own authorisations; external plugins take
+data outside that boundary — so anonymise before anything leaves the tenant.
+The protections list in SAP-TASKS.md is the checklist.
+
 ## Live demo
 
 **https://arjacobsen1-create.github.io/token-estimator/** — the app running in your browser, on the same engine as `src/`.
