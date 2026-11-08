@@ -24,8 +24,9 @@
   .tabs a{color:var(--muted);text-decoration:none;font-weight:600;font-size:14px;padding:7px 12px;border-bottom:2.5px solid transparent}
   .tabs a.on{color:#fff;border-bottom-color:var(--cyan)}
   .tabs a:hover{color:#fff}
+  .tabs a.util{opacity:.62}
   .wrap{max-width:1180px;margin:0 auto;padding:6px 16px 44px}
-  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:8px 0 14px}
+  .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:8px 0 14px}
   .kpi{background:linear-gradient(160deg,#10294d,#0c1f3a);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;position:relative}
   .kpi .ic{font-size:19px}
   .kpi .k{font-size:13px;color:var(--muted);font-weight:600;margin:2px 0}
@@ -33,7 +34,9 @@
   .kpi .n.green{color:var(--save)}
   .kpi .s{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.4}
   .badge{display:inline-block;background:#0b2e22;color:var(--save);border:1px solid #14532d;font-weight:800;font-size:12px;border-radius:999px;padding:2px 9px;margin-left:8px;vertical-align:2px}
-  .grid{display:grid;grid-template-columns:258px 1fr;gap:14px;margin:0 0 14px}
+  .grid{display:grid;grid-template-columns:258px minmax(0,1fr);gap:14px;margin:0 0 14px}
+  .grid>*,.chartgrid>*,.scenariogrid>*,.wfgrid>*,.kpis>*{min-width:0}
+  .tscroll{overflow-x:auto}
   .card{background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:16px}
   .card h2{margin:0 0 10px;font-size:16.5px}
   .card h2 .ic{color:var(--cyan);margin-right:7px}
@@ -42,28 +45,28 @@
   input[type=number],select{width:100%;background:var(--panel2);border:1.5px solid var(--line);color:var(--ink);border-radius:9px;padding:9px;font-size:14px;font-family:inherit}
   input[type=range]{width:100%;accent-color:var(--cyan);margin:8px 0 2px}
   button{width:100%;appearance:none;border:0;border-radius:10px;background:var(--cyan);color:#04202b;font-weight:900;font-size:15px;padding:13px;cursor:pointer;margin-top:16px}
-  .chartgrid{display:grid;grid-template-columns:1fr 228px;gap:14px}
+  .chartgrid{display:grid;grid-template-columns:minmax(0,1fr) 228px;gap:14px}
   .legend{font-size:12.5px;color:var(--muted);display:flex;gap:16px}
   .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
-  .chartwrap{display:grid;grid-template-columns:42px 1fr;gap:6px;margin-top:8px}
+  .chartwrap{display:grid;grid-template-columns:42px minmax(0,1fr);gap:6px;margin-top:8px}
   .yaxis{position:relative;height:230px}
   .yaxis span{position:absolute;right:3px;transform:translateY(50%);font-size:11px;color:var(--muted);white-space:nowrap}
   .gl{position:absolute;left:0;right:0;border-top:1px dashed #1e3a5f;z-index:0}
-  .vchart{display:flex;align-items:flex-end;gap:10px;height:230px;border-bottom:1.5px solid var(--line);padding:20px 4px 0;position:relative}
-  .vgroup{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;position:relative;z-index:1}
-  .vbars{display:flex;gap:5px;align-items:flex-end;height:100%}
-  .vbar{width:30px;border-radius:5px 5px 0 0;position:relative;min-height:2px}
+  .vchart{display:flex;align-items:flex-end;gap:10px;height:230px;border-bottom:1.5px solid var(--line);padding:20px 4px 0;position:relative;min-width:0}
+  .vgroup{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;position:relative;z-index:1;min-width:0}
+  .vbars{display:flex;gap:5px;align-items:flex-end;height:100%;min-width:0}
+  .vbar{flex:0 1 30px;border-radius:5px 5px 0 0;position:relative;min-height:2px}
   .vbar span{position:absolute;top:-19px;left:50%;transform:translateX(-50%);font-size:11.5px;font-weight:800;color:#fff;white-space:nowrap}
   .vbar.c span{color:var(--cyan)}
   .vlabels{display:flex;gap:10px;padding:7px 4px 0}
-  .vlabels div{flex:1;text-align:center;font-size:11.5px;color:var(--muted);line-height:1.3}
+  .vlabels div{flex:1;text-align:center;font-size:11.5px;color:var(--muted);line-height:1.3;min-width:0}
   .totals{background:var(--panel2);border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;height:fit-content}
   .totals h3{margin:0 0 9px;font-size:14.5px;color:#fff}
   .totals .row{display:flex;justify-content:space-between;font-size:13.5px;color:var(--muted);padding:4px 0}
   .totals .row b{color:#fff}
   .totals .save{border-top:1px solid var(--line);margin-top:8px;padding-top:9px}
   .totals .save .amt{font-size:21px;font-weight:900;color:var(--save)}
-  .scenariogrid{display:grid;grid-template-columns:1.55fr 1fr;gap:16px;align-items:center}
+  .scenariogrid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:16px;align-items:center}
   table{width:100%;border-collapse:collapse;font-size:14px}
   th{color:var(--muted);font-weight:600;text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);font-size:13px}
   td{padding:10px 8px;border-bottom:1px solid var(--line)}
@@ -85,9 +88,11 @@
   .pair div{height:100%;border-radius:3px}
   .val{font-weight:700;text-align:right}
   .note{font-size:13px;color:var(--muted);line-height:1.5}
+  details.how{margin:0 0 12px}
+  details.how summary{cursor:pointer;color:var(--cyan);font-weight:700;font-size:13px}
   .valid{display:flex;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
   .valid span{border:1px solid var(--line);border-radius:999px;padding:5px 11px;background:var(--panel)}
-  .wfgrid{display:grid;grid-template-columns:258px 1fr;gap:14px}
+  .wfgrid{display:grid;grid-template-columns:258px minmax(0,1fr);gap:14px}
   .wfhead{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
   .warnbox{display:none;background:#3a1414;border:1.5px solid #7f1d1d;color:#fecaca;border-radius:10px;padding:10px 12px;font-size:13.5px;margin:10px 0;line-height:1.45}
   .warnbox.show{display:block}
@@ -97,7 +102,7 @@
   .wfcrow{display:grid;grid-template-columns:64px 1fr 92px;gap:8px;align-items:center;margin:4px 0;font-size:12.5px}
   .chk{display:flex;gap:8px;align-items:center;margin-top:14px;font-size:13px;color:var(--muted);font-weight:600}
   .chk input{width:auto;accent-color:var(--cyan)}
-  @media(max-width:900px){.kpis{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.chartgrid{grid-template-columns:1fr}.scenariogrid{grid-template-columns:1fr}.vbar{width:20px}.wfgrid{grid-template-columns:1fr}.wfhead{grid-template-columns:1fr}}
+  @media(max-width:900px){.kpis{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.grid{grid-template-columns:minmax(0,1fr)}.chartgrid{grid-template-columns:minmax(0,1fr)}.scenariogrid{grid-template-columns:minmax(0,1fr)}.vbar{flex-basis:20px}.wfgrid{grid-template-columns:minmax(0,1fr)}.wfhead{grid-template-columns:minmax(0,1fr)}.vlabels div{overflow-wrap:anywhere;font-size:10.5px}}
   textarea.mn{width:100%;min-height:170px;resize:vertical;line-height:1.5;background:#0a1e3a;border:1px solid var(--line);border-radius:10px;color:var(--ink);padding:10px;font-family:inherit;font-size:14px}
   .mntiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px}
   .mnstat{background:#0a1e3a;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
@@ -123,12 +128,12 @@
   <nav class="tabs">
     <a class="on" href="./dashboard.html">▦ Estimator</a>
     <a href="#workflows">⇶ Workflows</a>
+    <a href="#minimiser">✂ Minimiser</a>
     <a href="#scenario">⧉ Scenarios</a>
     <a href="#models">⚙ Models</a>
     <a href="#measures">ⓘ About</a>
-    <a href="./index.html">App ↗</a>
-    <a href="https://github.com/arjacobsen1-create/token-estimator">GitHub ↗</a>
-    <a href="#minimiser">✂ Minimiser</a>
+    <a class="util" href="./index.html">App ↗</a>
+    <a class="util" href="https://github.com/arjacobsen1-create/token-estimator">GitHub ↗</a>
   </nav>
 </div>
 <div class="wrap">
@@ -150,7 +155,7 @@
       <select id="days"><option value="20">20</option><option value="30" selected>30</option></select>
       <label for="routing">Model Routing</label>
       <select id="routing">
-        <option value="optimised" selected>Optimized (Recommended)</option>
+        <option value="optimised" selected>Optimised (Recommended)</option>
         <option value="baseline">Baseline (Single Model)</option>
       </select>
       <p class="note" style="margin-top:12px">The routing choice sets which scenario the headline cost and the donut follow. The chart always shows both.</p>
@@ -159,7 +164,7 @@
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
         <h2 style="margin:0"><span class="ic">📊</span>SAP Task Cost Comparison (Monthly)</h2>
-        <div class="legend"><span><span class="dot" style="background:#2f6bff"></span>Baseline (Single Model)</span><span><span class="dot" style="background:#22d3ee"></span>Optimized (Model Routing)</span></div>
+        <div class="legend"><span><span class="dot" style="background:#2f6bff"></span>Baseline (Single Model)</span><span><span class="dot" style="background:#22d3ee"></span>Optimised (Model Routing)</span></div>
       </div>
       <div class="chartgrid">
         <div>
@@ -170,7 +175,7 @@
         <div class="totals">
           <h3>⧉ Total Monthly Cost</h3>
           <div class="row"><span>Baseline (Single Model)</span><b id="tBase"></b></div>
-          <div class="row"><span>Optimized (Routing)</span><b id="tOpt"></b></div>
+          <div class="row"><span>Optimised (Routing)</span><b id="tOpt"></b></div>
           <div class="save"><div style="font-size:13px;color:var(--muted)">Total Savings</div><span class="amt" id="tSave"></span><span class="badge" id="tBadge"></span></div>
         </div>
       </div>
@@ -180,11 +185,11 @@
   <div class="card" id="scenario" style="margin-bottom:14px">
     <h2><span class="ic">⚖</span>Scenario Comparison</h2>
     <div class="scenariogrid">
-      <table>
+      <div class="tscroll"><table>
         <tr><th>Scenario</th><th>Model Strategy</th><th>Monthly Cost</th><th>Savings</th><th>Change</th></tr>
         <tr id="rowBase"><td><span class="radio"></span><b>Baseline</b></td><td>Single model (GPT-6 Sol)</td><td id="sBase"></td><td>–</td><td>–</td></tr>
-        <tr id="rowOpt"><td><span class="radio"></span><b>Optimized</b></td><td>Model routing (Haiku + GPT-6 Sol)</td><td id="sOpt"></td><td id="sSave" style="color:var(--save);font-weight:800"></td><td><span class="badge" id="sBadge" style="margin:0"></span></td></tr>
-      </table>
+        <tr id="rowOpt"><td><span class="radio"></span><b>Optimised</b></td><td>Model routing (Haiku + GPT-6 Sol)</td><td id="sOpt"></td><td id="sSave" style="color:var(--save);font-weight:800"></td><td><span class="badge" id="sBadge" style="margin:0"></span></td></tr>
+      </table></div>
       <div class="donutwrap">
         <div class="donut" id="donut"><div class="hole"><b id="donutAmt"></b><span>Monthly Cost</span></div></div>
         <div class="dlegend" id="dlegend"></div>
@@ -195,7 +200,8 @@
 
   <div class="card" id="workflows" style="margin-bottom:14px">
     <h2><span class="ic">⇶</span>Workflows — Multi-step AI Cost Forecasting</h2>
-    <p class="note" style="margin:0 0 12px">The estimator above prices a task: one prompt, one reply. A workflow is an agent run of several steps. At every step the model receives the instruction, the retrieved material and everything the earlier steps produced, and that history is billed again. This mode prices the run, and shows what the way you carry the history costs.</p>
+    <p class="note" style="margin:0 0 12px">The estimator above prices one prompt and one reply; a workflow is a multi-step agent run where the history is billed again at every step, and this mode prices the run.</p>
+    <details class="how"><summary>How this works</summary><p class="note" style="margin:8px 0 0">At every step the model receives the instruction, the retrieved material and everything the earlier steps produced, and that history is billed again. This mode prices the run, and shows what the way you carry the history costs.</p></details>
     <div class="wfgrid">
       <div>
         <label for="wfModel">Model</label>
@@ -249,13 +255,13 @@
           <div class="totals"><h3 id="wfModeName">Full carry, per run</h3><div class="row"><span>Premium over baseline</span><b id="wfPrem"></b></div><div class="save"><span class="amt" id="wfModeRun" style="color:#fff"></span></div></div>
           <div class="totals"><h3>Expected monthly spend</h3><div class="row"><span id="wfMonthSub">Selected mode, at volume</span></div><div class="save"><span class="amt" id="wfMonth" style="color:#fff"></span></div></div>
         </div>
-        <table>
+        <div class="tscroll"><table>
           <tr><th>Carry mode</th><th>Per run</th><th>Premium</th><th>Monthly</th><th>What you give up</th></tr>
           <tr id="wfRowBase"><td><b>Baseline</b></td><td id="wfTBase"></td><td>—</td><td id="wfTBaseM"></td><td>Cost-only reference. Later steps cannot use what earlier steps found.</td></tr>
           <tr class="mode" id="wfRowFull" data-mode="full"><td><span class="radio"></span><b>Full carry</b></td><td id="wfTFull"></td><td id="wfTFullP"></td><td id="wfTFullM"></td><td>Maximum history retention, subject to context limits.<span class="subline" id="wfWarnFull"></span></td></tr>
           <tr class="mode" id="wfRowSummarised" data-mode="summarised"><td><span class="radio"></span><b>Summarised</b></td><td id="wfTSum"></td><td id="wfTSumP"></td><td id="wfTSumM"></td><td>Detail is compressed. Some of it will be lost.<span class="subline" id="wfSumLine"></span><span class="subline" id="wfWarnSummarised"></span></td></tr>
           <tr class="mode" id="wfRowWindowed" data-mode="windowed"><td><span class="radio"></span><b>Windowed</b></td><td id="wfTWin"></td><td id="wfTWinP"></td><td id="wfTWinM"></td><td>Older context is omitted. Steps can repeat or contradict earlier work.<span class="subline" id="wfWarnWindowed"></span></td></tr>
-        </table>
+        </table></div>
         <div class="warnbox" id="wfWarn"></div>
         <h3 style="font-size:14.5px;margin:14px 0 6px">Context sent at each step — <span id="wfBarsMode">full carry</span></h3>
         <div class="hchart" id="wfBars"></div>
@@ -268,7 +274,8 @@
   <div class="card" id="minimiser" style="margin-bottom:14px">
     <h2><span class="ic">✂</span>Minimiser — Reduce the Prompt, Cap the Reply</h2>
     <p class="note" style="margin:0 0 4px;color:var(--cyan);font-weight:700">Use fewer tokens. Preserve the intent.</p>
-    <p class="note" style="margin:0 0 12px">The third module of this product, running on the same shared engine and the same price table as everything above. Paste a prompt: the minimiser shrinks it, then does the part most tools skip — it predicts the <b style="color:var(--ink)">reply</b>, because a tiny prompt can trigger a huge, expensive answer. It minimises the total, input plus predicted output, and reports the saving as a range, framed by how you pay. The standalone Minimiser keeps its own site and design at <a href="https://arjacobsen1-create.github.io/token-minimiser/" style="color:var(--cyan)">token-minimiser</a>; the calculations are identical.</p>
+    <p class="note" style="margin:0 0 12px">Paste a prompt: the minimiser shrinks it and predicts the <b style="color:var(--ink)">reply</b>, because a tiny prompt can trigger a huge, expensive answer.</p>
+    <details class="how"><summary>How this works</summary><p class="note" style="margin:8px 0 0">The third module of this product, running on the same shared engine and the same price table as everything above. It minimises the total, input plus predicted output, and reports the saving as a range, framed by how you pay.</p></details>
     <div class="wfgrid">
       <div>
         <label for="mnText">Your prompt</label>
