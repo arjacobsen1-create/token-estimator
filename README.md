@@ -138,6 +138,11 @@ a cost figure — prices change often.
 
 ## A note on counting
 
-Version 1 counts tokens with a calibrated heuristic (see LEARNING.md, Lesson 1).
-The production step is swapping in each model's real tokenizer — that's
-Lesson 2, and the code is shaped so the swap is one function.
+Counting runs two ways. By default the engine uses a calibrated heuristic.
+When a real tokenizer is wired in — the live demo loads o200k_base in the
+browser — GPT-family counts are exact. Other models' tokenizers are not
+public, so their counts stay estimates; the heuristic was measured against
+the real tokenizers on a golden set and the full error table is published
+in ACCURACY.md (short prose within about ±12%, code and JSON much worse,
+which is exactly why the exact path exists). The Python port wires in
+tiktoken the same way.
