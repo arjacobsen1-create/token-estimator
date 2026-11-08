@@ -15,6 +15,21 @@ Tokens are the meter running underneath every AI product. The next decade of AI
 economics is about token minimising: doing the same work for fewer tokens.
 This app makes the meter visible.
 
+## Workflows — multi-step AI cost forecasting
+
+The estimator prices a task. The dashboard's **Workflows** mode prices an
+agent run: several steps, where the context grows at every step and is
+resent, steps sometimes retry, and the way the history is carried is an
+architectural choice with a price. It compares three carry modes (full
+carry, summarised, windowed) against a defined baseline, the same steps
+priced independently, and shows what each mode gives up as well as what it
+costs. Caching is modelled as idealised reuse, stated as such; a context
+limit check flags runs that outgrow the model's window.
+
+The calculation is specified in `DESIGN-AGENTIC.md`, and its two worked
+examples are the engine's golden tests: `node test/workflows.js` and
+`python3 python/test_workflows.py` (31 checks each, identical figures).
+
 ## Project layout
 
 ```
@@ -124,17 +139,33 @@ The protections list in SAP-TASKS.md is the checklist.
 ## Verify it works
 
 ```
-node test/smoke.js
+node test/smoke.js          4 checks
+node test/sap-edition.js    3 checks
+node test/workflows.js      72 checks (live prices + the design examples)
+python3 python/test_smoke.py        6 checks
+python3 python/test_workflows.py    72 checks, identical figures
 ```
 
-Four checks, including the ones that encode this project's lessons. If they
-pass, the engine works. The command-line demo is `node src/demo.js`.
+157 checks in all. If they pass, the engines work and agree. The
+command-line demo is `node src/demo.js`.
 
 ## A note on prices
 
 Model prices in `src/token-core.js` are editable defaults, marked as such.
-Always verify against the provider's current pricing page before relying on
-a cost figure — prices change often.
+They were checked on 8 Nov 2026 against the providers' published pricing
+pages. Two entries carry the date or tier a single rate hides, in a
+`priceNote` on the model: Claude Haiku 5.5's rate applies to prompts up to
+100K tokens ($0.50 / $2.50 above), and Gemini 4 Argon's is the standard rate
+from 1 Dec 2026 (introductory $2 / $10 through 30 Nov 2026).
+
+An audit note, kept on the record: before that check, the table carried an
+illustrative $5 / $25 against the name "GPT-6" and Haiku 4.5's $1 / $5
+against Haiku 5.5's name. Both were corrected to published prices (GPT-6 Sol
+$2 / $10, with GPT-6 Astra $10 / $50 as the premium option; Haiku 5.5
+$0.10 / $0.50), and every affected figure was recalculated. Figures published
+before 8 Nov 2026, including the launch post's, were computed at the older
+rates. Always verify against the provider's current pricing page before
+relying on a cost figure — prices change often.
 
 ## A note on counting
 
