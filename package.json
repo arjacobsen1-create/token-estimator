@@ -1,6 +1,6 @@
 {
   "description": "Estimate token counts and cost for AI tasks \u2014 and minimise them.",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "name": "token-estimator",
   "private": true,
   "scripts": {
