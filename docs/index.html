@@ -3,20 +3,26 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Token Estimator — Live Demo</title>
+<title>Token Estimator — App</title>
 <style>
-  :root{--ink:#17203a;--muted:#5b6478;--line:#d9deea;--bg:#f6f7fb;--green:#059669;--amber:#b45309}
+  :root{--ink:#17203a;--muted:#5b6478;--line:#d9deea;--bg:#f6f7fb;--green:#059669;--amber:#b45309;--purple:#7c3aed}
   *{box-sizing:border-box}
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-  .wrap{max-width:860px;margin:0 auto;padding:24px 16px 44px}
-  h1{font-size:27px;margin:0 0 2px}
-  .byline{color:var(--amber);font-weight:700;font-size:13.5px;margin:0 0 14px}
-  .lede{color:var(--muted);font-size:15px;line-height:1.5;margin:0 0 18px}
+  header{background:#111827;color:#fff;padding:20px 16px 16px}
+  header .in{max-width:920px;margin:0 auto}
+  h1{font-size:26px;margin:0}
+  .byline{color:#fbbf24;font-weight:700;font-size:13px;margin:3px 0 8px}
+  header p{color:#cbd5e1;font-size:14.5px;line-height:1.5;margin:0;max-width:760px}
+  .wrap{max-width:920px;margin:0 auto;padding:18px 16px 44px}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 14px}
+  .step{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;font-size:13.5px;line-height:1.45}
+  .step b{color:var(--green)}
   .card{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:16px;margin:0 0 14px}
+  .card h2{margin:0 0 3px;font-size:18px}
+  .card .sub{color:var(--muted);font-size:13.5px;margin:0 0 8px;line-height:1.5}
   label{font-weight:700;font-size:13px;display:block;margin:10px 0 5px}
-  label:first-child{margin-top:0}
   textarea,input,select{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px;font-size:14.5px;font-family:inherit;background:#fff}
-  textarea{min-height:86px;resize:vertical}
+  textarea{min-height:80px;resize:vertical}
   .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   button{appearance:none;border:0;border-radius:999px;background:var(--green);color:#fff;font-weight:800;font-size:15px;padding:12px 20px;cursor:pointer;margin-top:14px}
   .bar{display:flex;height:20px;border-radius:999px;overflow:hidden;border:1px solid var(--line);margin:8px 0 4px}
@@ -26,73 +32,86 @@
   table{width:100%;border-collapse:collapse;font-size:14px}
   th,td{text-align:right;padding:8px 6px;border-bottom:1px solid var(--line)}
   th:first-child,td:first-child{text-align:left}
-  .total{font-size:19px;font-weight:900}
+  .total{font-size:19px;font-weight:900;margin-top:12px}
+  .pick{background:#ecfdf5;border:1.5px solid #a7f3d0;border-radius:12px;padding:12px;margin-top:12px;font-size:14.5px;line-height:1.55}
+  .runner{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px;font-size:14px;line-height:1.55}
   .note{font-size:13px;color:var(--muted);line-height:1.5}
-  #out{display:none}
-  @media(max-width:560px){.row{grid-template-columns:1fr}}
+  @media(max-width:640px){.steps{grid-template-columns:1fr}.row{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<div class="wrap">
+<header><div class="in">
   <h1>Token Estimator</h1>
-  <p class="byline">Built by Anahita Jacobsen · Live demo</p>
-  <p class="lede">Paste a context and a question. The estimator counts the tokens, shows where they sit, predicts what the reply will cost, and prices the task on every model, at your volume. It runs entirely in your browser, on the same engine as the code in this repo (<i>src/token-core.js</i>, inlined into this page). Prices are editable defaults in the code, verify them against the provider before relying on a figure.</p>
+  <p class="byline">Built by Anahita Jacobsen</p>
+  <p>See what an AI task will cost before you run it: how many tokens go in, what the reply is likely to cost, which model should do it, and what it adds up to at your volume. Everything runs in your browser on the same engine as the code in this repo.</p>
+</div></header>
+<div class="wrap">
+  <div class="steps">
+    <div class="step"><b>1 · Estimate.</b> Paste the context and the question. Get the token count, where the tokens sit, and the price on every model.</div>
+    <div class="step"><b>2 · Pick the model.</b> Tell it the job and what matters, quality, cost, speed. It recommends, with reasons.</div>
+    <div class="step"><b>3 · SAP edition.</b> Working in SAP? Use the domain edition: 21 shapes of SAP work, pre-sized, with guidance and protections.</div>
+  </div>
 
   <div class="card">
-    <label for="ctx">Context (the document, the history, the stuff around the question)</label>
+    <h2>Estimate a task</h2>
+    <p class="sub">The context is usually the bill. The question is the smallest part.</p>
+    <label for="ctx">Context</label>
     <textarea id="ctx">Q3 supplier report: On-time delivery fell to 87%. Two suppliers account for most delays. Freight costs rose 12% quarter over quarter. The main distribution centre is at 94% capacity.</textarea>
     <label for="q">Your question</label>
     <textarea id="q" style="min-height:48px">Why is on-time delivery falling?</textarea>
     <div class="row">
-      <div>
-        <label for="task">Task type (drives the predicted reply size)</label>
-        <select id="task"></select>
-      </div>
-      <div>
-        <label for="runs">Runs per day</label>
-        <input id="runs" type="number" value="200" min="1">
-      </div>
+      <div><label for="task">Task type</label><select id="task"></select></div>
+      <div><label for="runs">Runs per day</label><input id="runs" type="number" value="200" min="1"></div>
     </div>
     <button id="go">Estimate</button>
+    <div id="out" style="display:none">
+      <div class="total" id="totalLine"></div>
+      <div class="bar" id="bar"></div>
+      <div class="legend" id="legend"></div>
+      <table><thead><tr><th>Model</th><th>In</th><th>Predicted out</th><th>$/run</th><th>$/month</th></tr></thead><tbody id="rows"></tbody></table>
+      <p class="note">On a flat subscription the marginal cost per run is $0, the plan is already paid; these dollars are API-equivalent, real charges for pay-per-token users. Either way the tokens are real: they burn allowance, limits and context window.</p>
+    </div>
   </div>
-
-  <div class="card" id="out">
-    <div class="total" id="totalLine"></div>
-    <div class="bar" id="bar"></div>
-    <div class="legend" id="legend"></div>
-    <p class="note" id="anatomyNote"></p>
-    <table>
-      <thead><tr><th>Model</th><th>In</th><th>Predicted out</th><th>$/run</th><th>$/month</th></tr></thead>
-      <tbody id="rows"></tbody>
-    </table>
-    <p class="note">On a flat subscription the marginal cost per run is $0, the plan is already paid; these dollars are API-equivalent, real charges for pay-per-token users. Either way the tokens are real: they burn allowance, limits and context window.</p>
-  </div>
-
 
   <div class="card">
-    <div class="total" style="font-size:17px">SAP &amp; Transformation edition</div>
-    <p class="note" style="margin-top:4px">The domain edition: 21 shapes of SAP work (Run, Build, Transform), each with a typical input size, guidance, and the protection to apply before pasting anything into a model. Built from public SAP work shapes only. The full list is SAP-TASKS.md in the repo.</p>
+    <h2>Which model should do it?</h2>
+    <p class="sub">The cheapest model that clears the bar, escalate only on failure. Pick a job and a priority.</p>
+    <div class="row">
+      <div><label for="sgTask">Job</label><select id="sgTask"></select></div>
+      <div><label for="sgPri">Priority</label>
+        <select id="sgPri"><option value="quality">Quality first</option><option value="balanced" selected>Balanced</option><option value="cost">Cost first</option><option value="speed">Speed first</option></select></div>
+    </div>
+    <div class="row">
+      <div><label for="sgIn">Typical input tokens</label><input id="sgIn" type="number" value="800" min="1"></div>
+      <div><label for="sgOut">Typical output tokens</label><input id="sgOut" type="number" value="400" min="1"></div>
+    </div>
+    <div class="row">
+      <div><label for="sgRuns">Runs per day</label><input id="sgRuns" type="number" value="100" min="1"></div>
+      <div></div>
+    </div>
+    <button id="sgGo">Recommend</button>
+    <div class="pick" id="sgPick" style="display:none"></div>
+    <div class="runner" id="sgRunner" style="display:none"></div>
+  </div>
+
+  <div class="card">
+    <h2>SAP &amp; Transformation edition</h2>
+    <p class="sub">21 shapes of SAP work (Run, Build, Transform), each pre-sized with guidance and the protection to apply before pasting anything into a model. Built from public SAP work shapes only. Full list: SAP-TASKS.md in the repo.</p>
     <label for="sapTask">SAP task</label>
     <select id="sapTask"></select>
     <div class="row">
-      <div>
-        <label for="sapModel">Model</label>
-        <select id="sapModel"></select>
-      </div>
-      <div>
-        <label for="sapRuns">Runs per day</label>
-        <input id="sapRuns" type="number" value="10" min="1">
-      </div>
+      <div><label for="sapModel">Model</label><select id="sapModel"></select></div>
+      <div><label for="sapRuns">Runs per day</label><input id="sapRuns" type="number" value="10" min="1"></div>
     </div>
     <button id="sapGo">Estimate this SAP task</button>
-    <div id="sapOut" style="display:none;margin-top:12px">
+    <div id="sapOut" style="display:none">
       <div class="total" id="sapLine" style="font-size:17px"></div>
       <p class="note" id="sapGuide"></p>
       <p class="note" id="sapProt"></p>
     </div>
   </div>
 
-  <p class="note">Full code, lesson notes and a runnable proof (<i>node test/smoke.js</i>, 4 checks) are in the repository. Counting is a calibrated heuristic; the production step is each model's real tokenizer, a one-function swap by design.</p>
+  <p class="note">Full code, lesson notes and runnable proofs (<i>node test/smoke.js</i>, <i>node test/sap-edition.js</i>) are in the repository. Prices are editable defaults in the code, verify against the provider before relying on a figure. Counting is a calibrated heuristic; the production step is each model's real tokenizer, a one-function swap by design.</p>
 </div>
 
 <script>var module = { exports: {} };</script>
@@ -291,10 +310,202 @@ module.exports = {
 };
 
 })();</script>
-<script>
-  const core = module.exports;
-</script>
-<script>var module = { exports: {} }; function require(p) { return core; }</script>
+<script>const core = module.exports; module = { exports: {} };</script>
+<script>(function(){
+/**
+ * model-suggester.js — "what to use for what."
+ *
+ * The Estimator counts and prices. The Suggester DECIDES:
+ * give it a task (and what you care about — quality, cost, speed),
+ * and it recommends a model, a runner-up, and the reasoning.
+ *
+ * How it works — no magic, and that's the point:
+ *   1. Every model gets TRAITS: quality, speed, cheapness scores (1–5),
+ *      plus the tasks it's known to be strong at.
+ *   2. Every task gets WEIGHTS: how much quality vs speed vs cheapness
+ *      usually matters for that kind of work.
+ *   3. Score = weighted sum, + a bonus when the task is one of the
+ *      model's known strengths. Rank, explain, price the winner.
+ *
+ * A recommender is a scoring table plus weights. When the table is wrong,
+ * you fix the table — you can always see WHY it picked what it picked.
+ *
+ * *** The model landscape changes monthly. This table is dated
+ * (October 2026) and is meant to be edited — updating it IS the job. ***
+ */
+
+"use strict";
+
+// ---------------------------------------------------------------------------
+// 1. THE MODEL TABLE (October 2026 — edit me)
+// ---------------------------------------------------------------------------
+// traits: quality / speed / cheap are 1–5 (5 = most / fastest / cheapest).
+// strengths: task ids this model is a known-good pick for.
+// Prices are EDITABLE DEFAULTS per 1M tokens — verify before relying.
+// ---------------------------------------------------------------------------
+
+const ROSTER = {
+  "gpt-6": {
+    label: "GPT-6",
+    traits: { quality: 5, speed: 3, cheap: 2 },
+    strengths: ["reasoning", "draft", "chat"],
+    inputPerMillion: 5.0,
+    outputPerMillion: 25.0,
+    note: "Frontier all-rounder.",
+  },
+  "gpt-6-1-terra": {
+    label: "GPT-6.1 Terra",
+    traits: { quality: 4, speed: 4, cheap: 3 },
+    strengths: ["computer-use", "agent"],
+    inputPerMillion: 2.5,
+    outputPerMillion: 12.0,
+    note: "Built for computer use — 3x faster than the pricier tiers at it.",
+  },
+  "claude-opus-5": {
+    label: "Claude Opus 5",
+    traits: { quality: 5, speed: 3, cheap: 2 },
+    strengths: ["code", "code-review", "reasoning", "draft"],
+    inputPerMillion: 5.0,
+    outputPerMillion: 25.0,
+    note: "The coding benchmark leader; writes ~90% of its own codebase's code.",
+  },
+  "claude-haiku-5-5": {
+    label: "Claude Haiku 5.5",
+    traits: { quality: 3, speed: 5, cheap: 4 },
+    strengths: ["classify", "extract", "summarise"],
+    inputPerMillion: 1.0,
+    outputPerMillion: 5.0,
+    note: "Frontier-quality lineage at small-model speed and price.",
+  },
+  "gemini-4-argon": {
+    label: "Gemini 4 Argon",
+    traits: { quality: 5, speed: 3, cheap: 3 },
+    strengths: ["long-document", "rag", "reasoning"],
+    inputPerMillion: 4.0,
+    outputPerMillion: 20.0,
+    note: "Ties GPT-6 at the frontier; the long-context specialist.",
+  },
+  "mercury-3": {
+    label: "Mercury 3",
+    traits: { quality: 3, speed: 5, cheap: 5 },
+    strengths: ["classify", "extract", "chat"],
+    inputPerMillion: 0.2, // launch price, Oct 2026
+    outputPerMillion: 0.7,
+    note: "Diffusion model — drafts many tokens at once. ~1,000 tokens/sec, pennies per run.",
+  },
+  "deepseek-v4-1-flash": {
+    label: "DeepSeek V4.1-Flash",
+    traits: { quality: 4, speed: 4, cheap: 5 },
+    strengths: ["code", "extract"],
+    inputPerMillion: 0.3,
+    outputPerMillion: 1.2,
+    note: "Beat Opus 5 on a coding benchmark at a fraction of the price. Note: US federal use is banned — check your compliance context.",
+  },
+  "kimi-k3-1-pro": {
+    label: "Kimi K3.1 Pro",
+    traits: { quality: 4, speed: 3, cheap: 4 },
+    strengths: ["code", "long-document"],
+    inputPerMillion: 0.6,
+    outputPerMillion: 2.5,
+    note: "Near-frontier, open weights coming — the strongest self-hostable option.",
+  },
+  "muse-spark-open": {
+    label: "Muse Spark Open",
+    traits: { quality: 4, speed: 4, cheap: 4 },
+    strengths: ["chat", "draft", "agent"],
+    inputPerMillion: 0.0, // open weights: you pay for your own hardware, not tokens
+    outputPerMillion: 0.0,
+    note: "816B open weights that run on two Mac Studios. $0 per token — the cost is the hardware.",
+  },
+};
+
+// ---------------------------------------------------------------------------
+// 2. THE TASK TABLE
+// ---------------------------------------------------------------------------
+// weights say what usually matters for the task, BEFORE the user adjusts.
+// priority shifts ("I care about cost") move the weights — see suggest().
+// ---------------------------------------------------------------------------
+
+const TASKS = {
+  classify: { label: "Classify / label at volume", weights: { quality: 1, speed: 3, cheap: 5 } },
+  extract: { label: "Extract data from documents", weights: { quality: 3, speed: 2, cheap: 4 } },
+  summarise: { label: "Summarise", weights: { quality: 3, speed: 2, cheap: 3 } },
+  chat: { label: "Customer-facing chat", weights: { quality: 3, speed: 4, cheap: 3 } },
+  draft: { label: "Draft / write long-form", weights: { quality: 5, speed: 1, cheap: 2 } },
+  code: { label: "Generate code", weights: { quality: 5, speed: 2, cheap: 2 } },
+  "code-review": { label: "Review code", weights: { quality: 5, speed: 2, cheap: 2 } },
+  reasoning: { label: "Hard reasoning / maths / analysis", weights: { quality: 5, speed: 1, cheap: 1 } },
+  "long-document": { label: "Very long documents", weights: { quality: 4, speed: 1, cheap: 3 } },
+  rag: { label: "Answer questions over your documents (RAG)", weights: { quality: 4, speed: 3, cheap: 3 } },
+  agent: { label: "Multi-step agent work", weights: { quality: 4, speed: 3, cheap: 3 } },
+  "computer-use": { label: "Computer use (clicks, forms, invoices)", weights: { quality: 4, speed: 4, cheap: 2 } },
+  translate: { label: "Translate", weights: { quality: 3, speed: 3, cheap: 4 } },
+};
+
+// ---------------------------------------------------------------------------
+// 3. THE SUGGESTER
+// ---------------------------------------------------------------------------
+
+const PRIORITY_SHIFTS = {
+  balanced: { quality: 0, speed: 0, cheap: 0 },
+  quality: { quality: 3, speed: 0, cheap: -1 },
+  cost: { quality: -1, speed: 0, cheap: 3 },
+  speed: { quality: 0, speed: 3, cheap: 0 },
+};
+
+function suggest(taskId, priority = "balanced") {
+  const task = TASKS[taskId];
+  if (!task) throw new Error("Unknown task: " + taskId);
+  const shift = PRIORITY_SHIFTS[priority] || PRIORITY_SHIFTS.balanced;
+  const w = {
+    quality: Math.max(0, task.weights.quality + shift.quality),
+    speed: Math.max(0, task.weights.speed + shift.speed),
+    cheap: Math.max(0, task.weights.cheap + shift.cheap),
+  };
+
+  const scored = Object.entries(ROSTER).map(([id, m]) => {
+    let score =
+      m.traits.quality * w.quality +
+      m.traits.speed * w.speed +
+      m.traits.cheap * w.cheap;
+    const reasons = [];
+    if (m.strengths.includes(taskId)) {
+      score += 10; // known-strength bonus
+      reasons.push("known strength for this task");
+    }
+    if (m.traits.cheap >= 5) reasons.push("cheapest tier per token");
+    if (m.traits.speed >= 5) reasons.push("fastest tier");
+    if (m.traits.quality >= 5) reasons.push("frontier quality");
+    reasons.push(m.note);
+    return { id, label: m.label, score, reasons };
+  });
+
+  scored.sort((a, b) => b.score - a.score);
+  return {
+    task: task.label,
+    priority,
+    pick: scored[0],
+    runnerUp: scored[1],
+    alsoConsidered: scored.slice(2, 4),
+  };
+}
+
+// Price a task on the suggested model, reusing the Estimator's logic:
+// predicted output by task-type ratio lives in token-core.js (TASK_TYPES).
+// Here we keep it simple: caller passes expected in/out tokens.
+
+function priceOn(modelId, inputTokens, outputTokens, runsPerDay = 1) {
+  const m = ROSTER[modelId];
+  const perRun =
+    (inputTokens / 1e6) * m.inputPerMillion +
+    (outputTokens / 1e6) * m.outputPerMillion;
+  return { perRun, perMonth: perRun * runsPerDay * 30 };
+}
+
+module.exports = { ROSTER, TASKS, PRIORITY_SHIFTS, suggest, priceOn };
+
+})();</script>
+<script>const suggester = module.exports; module = { exports: {} }; function require(p) { return core; }</script>
 <script>(function(){
 /**
  * domain-sap.js — the SAP & Transformation edition of the Token Estimator.
@@ -426,13 +637,33 @@ module.exports = { SAP_TASKS, estimateSapTask };
       s.innerHTML = '<span class="dot" style="background:' + colours[k] + '"></span>' + k + ' ' + a[k] + ' (' + a[k + 'Pct'] + '%)';
       legend.appendChild(s);
     });
-    document.getElementById('anatomyNote').textContent =
-      'Notice where the tokens sit: the question is usually the smallest part. The context is the bill.';
     const rows = core.compareModels({ inputTokens: a.total, taskType: taskSel.value, runsPerDay: runs });
     document.getElementById('rows').innerHTML = rows.map(r =>
       '<tr><td>' + r.model + '</td><td>' + r.inputTokens + '</td><td>' + r.outputTokens + '</td><td>$' +
       r.costPerRun.toFixed(4) + '</td><td>$' + r.costPerMonth.toFixed(2) + '</td></tr>').join('');
     document.getElementById('out').style.display = 'block';
+  });
+
+  const sgSel = document.getElementById('sgTask');
+  Object.keys(suggester.TASKS).forEach(k => {
+    const o = document.createElement('option');
+    o.value = k; o.textContent = suggester.TASKS[k].label || k;
+    if (k === 'code') o.selected = true;
+    sgSel.appendChild(o);
+  });
+  document.getElementById('sgGo').addEventListener('click', () => {
+    const s = suggester.suggest(sgSel.value, document.getElementById('sgPri').value);
+    const inT = Math.max(1, parseInt(document.getElementById('sgIn').value || '1', 10));
+    const outT = Math.max(1, parseInt(document.getElementById('sgOut').value || '1', 10));
+    const runs = Math.max(1, parseInt(document.getElementById('sgRuns').value || '1', 10));
+    const p = suggester.priceOn(s.pick.id, inT, outT, runs);
+    const pick = document.getElementById('sgPick');
+    pick.innerHTML = '<b>Use: ' + s.pick.label + '</b> — ' + s.pick.reasons.join('; ') +
+      '<br>On this pick: $' + p.perRun.toFixed(4) + '/run · $' + p.perMonth.toFixed(2) + '/month at ' + runs + ' runs/day.';
+    pick.style.display = 'block';
+    const run2 = document.getElementById('sgRunner');
+    run2.innerHTML = '<b>Runner-up: ' + s.runnerUp.label + '</b> — ' + s.runnerUp.reasons.join('; ');
+    run2.style.display = 'block';
   });
 
   const sapSel = document.getElementById('sapTask');
@@ -458,7 +689,9 @@ module.exports = { SAP_TASKS, estimateSapTask };
     document.getElementById('sapProt').textContent = 'Protection: ' + r.task.protection;
     document.getElementById('sapOut').style.display = 'block';
   });
+
   document.getElementById('go').click();
+  document.getElementById('sgGo').click();
   document.getElementById('sapGo').click();
 </script>
 </body>
