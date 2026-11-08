@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Estimator — Live Demo</title>
+<style>
+  :root{--ink:#17203a;--muted:#5b6478;--line:#d9deea;--bg:#f6f7fb;--green:#059669;--amber:#b45309}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  .wrap{max-width:860px;margin:0 auto;padding:24px 16px 44px}
+  h1{font-size:27px;margin:0 0 2px}
+  .byline{color:var(--amber);font-weight:700;font-size:13.5px;margin:0 0 14px}
+  .lede{color:var(--muted);font-size:15px;line-height:1.5;margin:0 0 18px}
+  .card{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:16px;margin:0 0 14px}
+  label{font-weight:700;font-size:13px;display:block;margin:10px 0 5px}
+  label:first-child{margin-top:0}
+  textarea,input,select{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px;font-size:14.5px;font-family:inherit;background:#fff}
+  textarea{min-height:86px;resize:vertical}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  button{appearance:none;border:0;border-radius:999px;background:var(--green);color:#fff;font-weight:800;font-size:15px;padding:12px 20px;cursor:pointer;margin-top:14px}
+  .bar{display:flex;height:20px;border-radius:999px;overflow:hidden;border:1px solid var(--line);margin:8px 0 4px}
+  .bar div{height:100%}
+  .legend{font-size:13px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap}
+  .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:right;padding:8px 6px;border-bottom:1px solid var(--line)}
+  th:first-child,td:first-child{text-align:left}
+  .total{font-size:19px;font-weight:900}
+  .note{font-size:13px;color:var(--muted);line-height:1.5}
+  #out{display:none}
+  @media(max-width:560px){.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Token Estimator</h1>
+  <p class="byline">Built by Anahita Jacobsen · Live demo</p>
+  <p class="lede">Paste a context and a question. The estimator counts the tokens, shows where they sit, predicts what the reply will cost, and prices the task on every model, at your volume. It runs entirely in your browser, on the same engine as the code in this repo (<i>src/token-core.js</i>). Prices are editable defaults in the code, verify them against the provider before relying on a figure.</p>
+
+  <div class="card">
+    <label for="ctx">Context (the document, the history, the stuff around the question)</label>
+    <textarea id="ctx">Q3 supplier report: On-time delivery fell to 87%. Two suppliers account for most delays. Freight costs rose 12% quarter over quarter. The main distribution centre is at 94% capacity.</textarea>
+    <label for="q">Your question</label>
+    <textarea id="q" style="min-height:48px">Why is on-time delivery falling?</textarea>
+    <div class="row">
+      <div>
+        <label for="task">Task type (drives the predicted reply size)</label>
+        <select id="task"></select>
+      </div>
+      <div>
+        <label for="runs">Runs per day</label>
+        <input id="runs" type="number" value="200" min="1">
+      </div>
+    </div>
+    <button id="go">Estimate</button>
+  </div>
+
+  <div class="card" id="out">
+    <div class="total" id="totalLine"></div>
+    <div class="bar" id="bar"></div>
+    <div class="legend" id="legend"></div>
+    <p class="note" id="anatomyNote"></p>
+    <table>
+      <thead><tr><th>Model</th><th>In</th><th>Predicted out</th><th>$/run</th><th>$/month</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <p class="note">On a flat subscription the marginal cost per run is $0, the plan is already paid; these dollars are API-equivalent, real charges for pay-per-token users. Either way the tokens are real: they burn allowance, limits and context window.</p>
+  </div>
+
+  <p class="note">Full code, lesson notes and a runnable proof (<i>node test/smoke.js</i>, 4 checks) are in the repository. Counting is a calibrated heuristic; the production step is each model's real tokenizer, a one-function swap by design.</p>
+</div>
+
+<script>var module = { exports: {} };</script>
+<script src="../src/token-core.js"></script>
+<script>
+  const core = module.exports;
+  const taskSel = document.getElementById('task');
+  Object.keys(core.TASK_TYPES).forEach(k => {
+    const o = document.createElement('option');
+    o.value = k; o.textContent = core.TASK_TYPES[k].label || k;
+    if (k === 'summarise') o.selected = true;
+    taskSel.appendChild(o);
+  });
+  const colours = { system:'#7c3aed', context:'#2563eb', history:'#ea580c', question:'#059669' };
+  document.getElementById('go').addEventListener('click', () => {
+    const parts = {
+      system: 'You are a helpful assistant for a supply chain team. Answer in a professional tone. Always be concise.',
+      context: document.getElementById('ctx').value,
+      history: '',
+      question: document.getElementById('q').value
+    };
+    const runs = Math.max(1, parseInt(document.getElementById('runs').value || '1', 10));
+    const a = core.analysePrompt(parts, 'gpt-6');
+    document.getElementById('totalLine').textContent = a.total.toLocaleString() + ' input tokens';
+    const bar = document.getElementById('bar'); bar.innerHTML = '';
+    const legend = document.getElementById('legend'); legend.innerHTML = '';
+    ['system','context','history','question'].forEach(k => {
+      if (!a[k]) return;
+      const d = document.createElement('div');
+      d.style.width = a[k + 'Pct'] + '%'; d.style.background = colours[k];
+      bar.appendChild(d);
+      const s = document.createElement('span');
+      s.innerHTML = '<span class="dot" style="background:' + colours[k] + '"></span>' + k + ' ' + a[k] + ' (' + a[k + 'Pct'] + '%)';
+      legend.appendChild(s);
+    });
+    document.getElementById('anatomyNote').textContent =
+      'Notice where the tokens sit: the question is usually the smallest part. The context is the bill.';
+    const rows = core.compareModels({ inputTokens: a.total, taskType: taskSel.value, runsPerDay: runs });
+    document.getElementById('rows').innerHTML = rows.map(r =>
+      '<tr><td>' + r.model + '</td><td>' + r.inputTokens + '</td><td>' + r.outputTokens + '</td><td>$' +
+      r.costPerRun.toFixed(4) + '</td><td>$' + r.costPerMonth.toFixed(2) + '</td></tr>').join('');
+    document.getElementById('out').style.display = 'block';
+  });
+  document.getElementById('go').click();
+</script>
+</body>
+</html>
