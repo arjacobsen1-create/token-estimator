@@ -41,6 +41,21 @@ node src/demo.js
 Public prototype, in development. A working prototype also exists as a web app;
 this repo is the real codebase that will be packaged for the App Store.
 
+## Python version
+
+The same engine in Python lives in `python/` — `token_core.py`,
+`model_suggester.py`, `domain_sap.py` — held to the JavaScript engine's
+numbers by a parity check (counts, estimates, suggestions and all 21 SAP
+tasks compared value for value during the port).
+
+```
+python3 python/test_smoke.py   the proof the port works (6 checks)
+python3 python/sap_demo.py     the SAP edition, priced on two models
+```
+
+The JavaScript engine remains the one that powers the live web demo —
+the browser runs JavaScript natively, with no server.
+
 ## SAP & Transformation edition
 
 The domain edition lives in `src/domain-sap.js`: 21 shapes of SAP work
