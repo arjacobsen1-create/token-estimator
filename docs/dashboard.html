@@ -1001,6 +1001,7 @@ module.exports = { SAP_TASKS, estimateSapTask };
   }
   $('recalc').addEventListener('click', draw);
   $('volRange').addEventListener('input', () => { $('vol').value = $('volRange').value; draw(); });
+  $('vol').addEventListener('input', () => { const v = parseInt($('vol').value, 10); if (isNaN(v)) return; $('volRange').value = Math.min(100, Math.max(1, v)); draw(); });
   $('days').addEventListener('change', draw);
   $('routing').addEventListener('change', draw);
   $('rowBase').addEventListener('click', () => { $('routing').value = 'baseline'; draw(); });
