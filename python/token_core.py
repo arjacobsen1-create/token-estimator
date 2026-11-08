@@ -25,6 +25,7 @@ MODELS = {
         "charsPerToken": 4.0,
         "inputPerMillion": 5.0,
         "outputPerMillion": 25.0,
+        "tokenizer": "o200k_base",  # exact counting available for this family
     },
     "claude-opus-5": {
         "label": "Claude Opus 5 (frontier)",
@@ -53,7 +54,32 @@ MODELS = {
 }
 
 
-def count_tokens(text, model_id=None):
+# ACCURACY (2026-11-08): the heuristic below was measured against real
+# tokenizers on a golden set (see ACCURACY.md in this repo). It overstates
+# long prose by ~30% and understates code, JSON and number-heavy text by
+# 35-60%. Models with a published tokenizer (GPT family, o200k_base) can
+# be counted EXACTLY once a real counter is wired in, e.g.:
+#   import tiktoken
+#   enc = tiktoken.get_encoding("o200k_base")
+#   set_exact_counter(lambda text: len(enc.encode(text)))
+# Everything else stays a labelled estimate with the measured error
+# published.
+_exact_counter = None
+
+
+def set_exact_counter(fn):
+    """Wire in a real tokenizer: set_exact_counter(fn) where fn(text)->int."""
+    global _exact_counter
+    _exact_counter = fn
+
+
+def counting_method(model_id=None):
+    """"exact" when a real tokenizer is wired for this model, else "estimate"."""
+    model = MODELS.get(model_id) or MODELS["gpt-6"]
+    return "exact" if (_exact_counter and model.get("tokenizer")) else "estimate"
+
+
+def count_tokens_heuristic(text, model_id=None):
     if not text:
         return 0
     model = MODELS.get(model_id) or MODELS["gpt-6"]
@@ -61,6 +87,15 @@ def count_tokens(text, model_id=None):
     words = len(text.split())
     by_words = words / 0.75
     return _round((by_chars + by_words) / 2)
+
+
+def count_tokens(text, model_id=None):
+    if not text:
+        return 0
+    model = MODELS.get(model_id) or MODELS["gpt-6"]
+    if _exact_counter and model.get("tokenizer"):
+        return _exact_counter(text)
+    return count_tokens_heuristic(text, model_id)
 
 
 def analyse_prompt(parts, model_id=None):
