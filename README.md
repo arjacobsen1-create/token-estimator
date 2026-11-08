@@ -28,7 +28,31 @@ limit check flags runs that outgrow the model's window.
 
 The calculation is specified in `DESIGN-AGENTIC.md`, and its two worked
 examples are the engine's golden tests: `node test/workflows.js` and
-`python3 python/test_workflows.py` (31 checks each, identical figures).
+`python3 python/test_workflows.py` — the suites run 72 checks each,
+identical figures in both implementations.
+
+## One product, three modules
+
+Token Estimator is an AI cost planning and optimisation product with
+three modules on **one shared pricing and counting engine**
+(`src/shared-models.js`, mirrored in `python/shared_models.py`):
+
+- **Estimator** — forecast a task's tokens and cost (above).
+- **Workflows** — forecast a multi-step agent run (above).
+- **Minimiser** — the Token Minimiser as a native module of the
+  dashboard: paste a prompt, it shrinks the prompt and caps the
+  reply, and reports the total before and after. The standalone
+  Minimiser keeps its own site and design; the calculations are
+  identical, from the same shared engine.
+
+The loop: **Estimate → Minimise → Re-estimate → Run** (Run = copy the
+optimised prompt into your own AI tool; this product forecasts and
+prepares, it does not execute). Two hand-offs connect the modules:
+**Optimise this estimate** on the app front, and **Use as Workflows
+starting context** in the dashboard. The structure is specified in
+`DESIGN-STACK.md`. Parity tests (`test/shared-parity.js`,
+`python/test_shared_parity.py`) fail if the engines' price tables or
+counters ever drift apart.
 
 ## Project layout
 
@@ -142,16 +166,18 @@ The protections list in SAP-TASKS.md is the checklist.
 node test/smoke.js          4 checks
 node test/sap-edition.js    3 checks
 node test/workflows.js      72 checks (live prices + the design examples)
+node test/shared-parity.js  4 checks (one price table, one counter, both engines)
 python3 python/test_smoke.py        6 checks
 python3 python/test_workflows.py    72 checks, identical figures
+python3 python/test_shared_parity.py  4 checks
 ```
 
-157 checks in all. If they pass, the engines work and agree. The
+165 checks in all. If they pass, the engines work and agree. The
 command-line demo is `node src/demo.js`.
 
 ## A note on prices
 
-Model prices in `src/token-core.js` are editable defaults, marked as such.
+Model prices in `src/shared-models.js` are editable defaults, marked as such.
 They were checked on 8 Nov 2026 against the providers' published pricing
 pages. Two entries carry the date or tier a single rate hides, in a
 `priceNote` on the model: Claude Haiku 5.5's rate applies to prompts up to
