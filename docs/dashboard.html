@@ -38,8 +38,12 @@
   .chartgrid{display:grid;grid-template-columns:1fr 228px;gap:14px}
   .legend{font-size:12.5px;color:var(--muted);display:flex;gap:16px}
   .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
-  .vchart{display:flex;align-items:flex-end;gap:10px;height:230px;border-bottom:1.5px solid var(--line);padding:20px 4px 0;margin-top:8px;position:relative}
-  .vgroup{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+  .chartwrap{display:grid;grid-template-columns:42px 1fr;gap:6px;margin-top:8px}
+  .yaxis{position:relative;height:230px}
+  .yaxis span{position:absolute;right:3px;transform:translateY(50%);font-size:11px;color:var(--muted);white-space:nowrap}
+  .gl{position:absolute;left:0;right:0;border-top:1px dashed #1e3a5f;z-index:0}
+  .vchart{display:flex;align-items:flex-end;gap:10px;height:230px;border-bottom:1.5px solid var(--line);padding:20px 4px 0;position:relative}
+  .vgroup{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;position:relative;z-index:1}
   .vbars{display:flex;gap:5px;align-items:flex-end;height:100%}
   .vbar{width:30px;border-radius:5px 5px 0 0;position:relative;min-height:2px}
   .vbar span{position:absolute;top:-19px;left:50%;transform:translateX(-50%);font-size:11.5px;font-weight:800;color:#fff;white-space:nowrap}
@@ -132,8 +136,8 @@
       </div>
       <div class="chartgrid">
         <div>
-          <div class="vchart" id="vchart"></div>
-          <div class="vlabels" id="vlabels"></div>
+          <div class="chartwrap"><div class="yaxis" id="yaxis"></div><div class="vchart" id="vchart"></div></div>
+          <div class="vlabels" id="vlabels" style="margin-left:48px"></div>
           <p class="note" id="chartNote" style="margin-top:10px"></p>
         </div>
         <div class="totals">
@@ -585,11 +589,19 @@ module.exports = { SAP_TASKS, estimateSapTask };
     $('rowOpt').className = routing === 'optimised' ? 'sel' : '';
 
     const top = [...per].sort((a, b) => (b.g - b.o) - (a.g - a.o) || b.g - a.g).slice(0, 6);
-    const max = top[0].g;
-    $('vchart').innerHTML = top.map(t =>
+    const rawMax = top[0].g;
+    const niceSteps = [2, 5, 10, 15, 20, 25, 40, 50, 75, 100, 150, 200, 300, 500];
+    const ceil = niceSteps.find(s => s >= rawMax) || rawMax;
+    const fmtTick = v => '$' + (v >= 10 || Number.isInteger(v) ? Math.round(v) : v.toFixed(1));
+    const ticks = [0, 0.25, 0.5, 0.75, 1];
+    $('yaxis').innerHTML = ticks.map(f =>
+      '<span style="bottom:' + (f * 100) + '%">' + fmtTick(ceil * f) + '</span>').join('');
+    const grid = ticks.slice(1).map(f =>
+      '<div class="gl" style="bottom:' + (f * 100) + '%"></div>').join('');
+    $('vchart').innerHTML = grid + top.map(t =>
       '<div class="vgroup"><div class="vbars">' +
-      '<div class="vbar" style="height:' + Math.max(2, (t.g / max) * 100) + '%;background:#2f6bff"><span>' + money(t.g) + '</span></div>' +
-      '<div class="vbar c" style="height:' + Math.max(2, (t.o / max) * 100) + '%;background:#22d3ee"><span>' + money(t.o) + '</span></div>' +
+      '<div class="vbar" style="height:' + Math.max(2, (t.g / ceil) * 100) + '%;background:#2f6bff"><span>' + money(t.g) + '</span></div>' +
+      '<div class="vbar c" style="height:' + Math.max(2, (t.o / ceil) * 100) + '%;background:#22d3ee"><span>' + money(t.o) + '</span></div>' +
       '</div></div>').join('');
     $('vlabels').innerHTML = top.map(t => '<div>' + t.name + '</div>').join('');
     $('chartNote').textContent = 'The six tasks where routing saves the most at this volume. Drafting and code tasks stay on the frontier model under the routing policy, so their two bars match. Every task is priced in the totals; the full list lives in the app and in SAP-TASKS.md in the repo.';
