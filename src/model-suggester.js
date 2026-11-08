@@ -35,8 +35,8 @@ const ROSTER = {
     label: "GPT-6",
     traits: { quality: 5, speed: 3, cheap: 2 },
     strengths: ["reasoning", "draft", "chat"],
-    inputPerMillion: 5.0,
-    outputPerMillion: 25.0,
+    inputPerMillion: 2.0, // GPT-6 Sol rates, checked 2026-11-08
+    outputPerMillion: 10.0,
     note: "Frontier all-rounder.",
   },
   "gpt-6-1-terra": {
@@ -57,10 +57,10 @@ const ROSTER = {
   },
   "claude-haiku-5-5": {
     label: "Claude Haiku 5.5",
-    traits: { quality: 3, speed: 5, cheap: 4 },
+    traits: { quality: 3, speed: 5, cheap: 5 },
     strengths: ["classify", "extract", "summarise"],
-    inputPerMillion: 1.0,
-    outputPerMillion: 5.0,
+    inputPerMillion: 0.1, // prompts up to 100K tokens; checked 2026-11-08
+    outputPerMillion: 0.5,
     note: "Frontier-quality lineage at small-model speed and price.",
   },
   "gemini-4-argon": {
