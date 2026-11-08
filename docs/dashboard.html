@@ -3,111 +3,173 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Token Estimator — Financial Intelligence Dashboard</title>
+<title>Token Estimator — AI Consumption Forecasting & Cost Estimation</title>
 <style>
-  :root{--cobalt:#6ea8ff;--blue:#2f6bff;--cyan:#22d3ee;--cloud:#081527;--ink:#eaf2fb;--muted:#93a9c4;--line:#1e3a5f;--save:#34d399}
+  :root{--bg:#081527;--panel:#0d2140;--panel2:#0a1a30;--line:#1e3a5f;--ink:#eaf2fb;--muted:#93a9c4;--blue:#2f6bff;--cyan:#22d3ee;--save:#34d399;--violet:#a78bfa}
   *{box-sizing:border-box}
-  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--cloud);color:var(--ink)}
-  header{background:linear-gradient(120deg,#16296b,#1d4ed8 60%,#0891b2);color:#fff;padding:22px 16px 18px}
-  header .in{max-width:960px;margin:0 auto}
-  .kicker{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#7dd3fc;margin:0 0 4px}
-  h1{font-size:30px;margin:0;letter-spacing:-.01em}
-  .tagline{font-size:16.5px;color:#dbeafe;margin:4px 0 2px;font-weight:600}
-  .byline{color:#a5f3fc;font-weight:700;font-size:13px;margin:2px 0 0}
-  header p.desc{color:#bfdbfe;font-size:13.5px;line-height:1.5;margin:8px 0 0;max-width:780px}
-  nav{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
-  nav a{color:#fff;text-decoration:none;font-weight:700;font-size:13px;border:1.5px solid rgba(255,255,255,.45);padding:6px 12px;border-radius:999px}
-  nav a.here{background:#fff;color:var(--cobalt);border-color:#fff}
-  .wrap{max-width:960px;margin:0 auto;padding:18px 16px 44px}
-  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 14px}
-  .kpi{background:#0e2138;border:1.5px solid var(--line);border-radius:14px;padding:13px 14px}
-  .kpi .n{font-size:25px;font-weight:900;color:var(--cobalt)}
-  .kpi .n em{font-style:normal;color:var(--save)}
-  .kpi .k{font-size:11.5px;font-weight:800;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;margin-top:2px}
-  .kpi .s{font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.4}
-  .card{background:#0e2138;border:1.5px solid var(--line);border-radius:14px;padding:16px;margin:0 0 14px}
-  .card h2{margin:0 0 3px;font-size:18px;color:var(--cobalt)}
-  .card .sub{color:var(--muted);font-size:13.5px;margin:0 0 10px;line-height:1.5}
-  .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin:0 0 12px}
-  .controls label{font-weight:700;font-size:13px;display:block;margin:0 0 5px}
-  input{border:1.5px solid var(--line);border-radius:10px;padding:9px;font-size:14px;font-family:inherit;background:#0e2138;color:var(--ink)}
-  button{appearance:none;border:0;border-radius:999px;background:var(--blue);color:#fff;font-weight:800;font-size:14px;padding:10px 18px;cursor:pointer}
-  .chart{font-size:13px}
-  .crow{display:grid;grid-template-columns:200px 1fr 118px;gap:8px;align-items:center;margin:5px 0}
-  .crow .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .track{background:#16304f;border-radius:6px;height:16px}
-  .pair{display:flex;height:16px;gap:2px}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  .topbar{max-width:1180px;margin:0 auto;padding:16px 16px 10px;display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
+  .brand{display:flex;gap:12px;align-items:center}
+  .brand h1{font-size:25px;margin:0}
+  .brand .sub{color:var(--muted);font-size:13.5px;margin-top:1px}
+  .brand .by{color:#7dd3fc;font-size:12px;font-weight:700;margin-top:2px}
+  .tabs{display:flex;gap:4px;align-items:center;padding-top:6px;flex-wrap:wrap}
+  .tabs a{color:var(--muted);text-decoration:none;font-weight:600;font-size:14px;padding:7px 12px;border-bottom:2.5px solid transparent}
+  .tabs a.on{color:#fff;border-bottom-color:var(--cyan)}
+  .tabs a:hover{color:#fff}
+  .wrap{max-width:1180px;margin:0 auto;padding:6px 16px 44px}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:8px 0 14px}
+  .kpi{background:linear-gradient(160deg,#10294d,#0c1f3a);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;position:relative}
+  .kpi .ic{font-size:19px}
+  .kpi .k{font-size:13px;color:var(--muted);font-weight:600;margin:2px 0}
+  .kpi .n{font-size:24px;font-weight:900;color:#fff}
+  .kpi .n.green{color:var(--save)}
+  .kpi .s{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.4}
+  .badge{display:inline-block;background:#0b2e22;color:var(--save);border:1px solid #14532d;font-weight:800;font-size:12px;border-radius:999px;padding:2px 9px;margin-left:8px;vertical-align:2px}
+  .grid{display:grid;grid-template-columns:258px 1fr;gap:14px;margin:0 0 14px}
+  .card{background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:16px}
+  .card h2{margin:0 0 10px;font-size:16.5px}
+  .card h2 .ic{color:var(--cyan);margin-right:7px}
+  label{font-size:13px;color:var(--muted);font-weight:600;display:block;margin:12px 0 5px}
+  label:first-of-type{margin-top:2px}
+  input[type=number],select{width:100%;background:var(--panel2);border:1.5px solid var(--line);color:var(--ink);border-radius:9px;padding:9px;font-size:14px;font-family:inherit}
+  input[type=range]{width:100%;accent-color:var(--cyan);margin:8px 0 2px}
+  button{width:100%;appearance:none;border:0;border-radius:10px;background:var(--cyan);color:#04202b;font-weight:900;font-size:15px;padding:13px;cursor:pointer;margin-top:16px}
+  .chartgrid{display:grid;grid-template-columns:1fr 228px;gap:14px}
+  .legend{font-size:12.5px;color:var(--muted);display:flex;gap:16px}
+  .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+  .vchart{display:flex;align-items:flex-end;gap:10px;height:230px;border-bottom:1.5px solid var(--line);padding:20px 4px 0;margin-top:8px;position:relative}
+  .vgroup{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+  .vbars{display:flex;gap:5px;align-items:flex-end;height:100%}
+  .vbar{width:30px;border-radius:5px 5px 0 0;position:relative;min-height:2px}
+  .vbar span{position:absolute;top:-19px;left:50%;transform:translateX(-50%);font-size:11.5px;font-weight:800;color:#fff;white-space:nowrap}
+  .vbar.c span{color:var(--cyan)}
+  .vlabels{display:flex;gap:10px;padding:7px 4px 0}
+  .vlabels div{flex:1;text-align:center;font-size:11.5px;color:var(--muted);line-height:1.3}
+  .totals{background:var(--panel2);border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;height:fit-content}
+  .totals h3{margin:0 0 9px;font-size:14.5px;color:#fff}
+  .totals .row{display:flex;justify-content:space-between;font-size:13.5px;color:var(--muted);padding:4px 0}
+  .totals .row b{color:#fff}
+  .totals .save{border-top:1px solid var(--line);margin-top:8px;padding-top:9px}
+  .totals .save .amt{font-size:21px;font-weight:900;color:var(--save)}
+  .scenariogrid{display:grid;grid-template-columns:1.55fr 1fr;gap:16px;align-items:center}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th{color:var(--muted);font-weight:600;text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);font-size:13px}
+  td{padding:10px 8px;border-bottom:1px solid var(--line)}
+  tr.sel td{background:#0a2e3f}
+  tr.sel td:first-child{border-radius:8px 0 0 8px} tr.sel td:last-child{border-radius:0 8px 8px 0}
+  .radio{display:inline-block;width:13px;height:13px;border:2px solid var(--muted);border-radius:50%;margin-right:8px;vertical-align:-2px}
+  tr.sel .radio{border-color:var(--cyan);background:radial-gradient(circle,var(--cyan) 0 4px,transparent 5px)}
+  .donutwrap{display:flex;gap:16px;align-items:center}
+  .donut{width:158px;height:158px;border-radius:50%;position:relative;flex:none}
+  .donut .hole{position:absolute;inset:26px;background:var(--panel);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  .donut .hole b{font-size:18px}
+  .donut .hole span{font-size:11px;color:var(--muted)}
+  .dlegend{font-size:13px;line-height:1.9;color:var(--muted)}
+  .dlegend b{color:var(--ink);float:right;margin-left:18px}
+  .hchart{font-size:13px}
+  .crow{display:grid;grid-template-columns:190px 1fr 110px;gap:8px;align-items:center;margin:5px 0}
+  .track{background:#16304f;border-radius:6px;height:15px}
+  .pair{display:flex;height:15px;gap:2px}
   .pair div{height:100%;border-radius:3px}
   .val{font-weight:700;text-align:right}
-  .legend{font-size:12.5px;color:var(--muted);display:flex;gap:14px;margin:6px 0 2px}
-  .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
-  .scenario{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .scen{border:1.5px solid var(--line);border-radius:12px;padding:13px}
-  .scen .h{font-weight:800;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
-  .scen .amt{font-size:27px;font-weight:900;margin:3px 0}
-  .scen.base .amt{color:var(--cobalt)} .scen.opt .amt{color:var(--save)}
-  .scen .bar{height:14px;border-radius:4px;margin:6px 0}
-  .scen p{font-size:12.5px;color:var(--muted);line-height:1.45;margin:4px 0 0}
-  .savenote{background:#0b2e22;border:1.5px solid #14532d;border-radius:12px;padding:11px 13px;font-size:14px;margin-top:12px}
   .note{font-size:13px;color:var(--muted);line-height:1.5}
   .valid{display:flex;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
-  .valid span{border:1px solid var(--line);border-radius:999px;padding:5px 11px;background:#0e2138}
-  @media(max-width:760px){.kpis{grid-template-columns:1fr 1fr}.scenario{grid-template-columns:1fr}.crow{grid-template-columns:124px 1fr 102px}}
+  .valid span{border:1px solid var(--line);border-radius:999px;padding:5px 11px;background:var(--panel)}
+  @media(max-width:900px){.kpis{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.chartgrid{grid-template-columns:1fr}.scenariogrid{grid-template-columns:1fr}.vbar{width:20px}}
 </style>
 </head>
 <body>
-<header><div class="in">
-  <p class="kicker">Token Estimator · Financial Intelligence</p>
-  <h1>Understand the cost before you run.</h1>
-  <p class="tagline">AI consumption forecasting and model selection for a real SAP workload.</p>
-  <p class="byline">Built by Anahita Jacobsen</p>
-  <p class="desc">Every figure on this page is computed live by the estimator engine, from the SAP &amp; Transformation edition: 21 shapes of SAP work, priced per model, at your volume. Change the volume and the whole page re-prices.</p>
-  <nav>
-    <a href="./index.html">App</a>
-    <a class="here" href="./dashboard.html">Dashboard</a>
-    <a href="https://github.com/arjacobsen1-create/token-estimator">GitHub</a>
-    <a href="https://arjacobsen1-create.github.io/token-minimiser/">Token Minimiser →</a>
-  </nav>
-</div></header>
-<div class="wrap">
-  <div class="controls" style="margin-top:2px">
-    <div><label for="vol">Runs per day, per task</label><input id="vol" type="number" value="10" min="1" style="width:130px"></div>
-    <button id="recalc">Recalculate</button>
+<div class="topbar">
+  <div class="brand">
+    <svg width="42" height="42" viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M24 4 44 15 24 26 4 15Z" fill="#22d3ee"/><path d="M8 24 24 33 40 24 44 28 24 39 4 28Z" fill="#2f6bff"/><path d="M8 33 24 42 40 33 44 37 24 48 4 37Z" fill="#1d4ed8" transform="translate(0 -4)"/></svg>
+    <div>
+      <h1>Token Estimator</h1>
+      <div class="sub">AI Consumption Forecasting &amp; Cost Estimation</div>
+      <div class="by">Built by Anahita Jacobsen · Understand the cost before you run.</div>
+    </div>
   </div>
+  <nav class="tabs">
+    <a class="on" href="./dashboard.html">▦ Estimator</a>
+    <a href="#scenario">⧉ Scenarios</a>
+    <a href="#models">⚙ Models</a>
+    <a href="#about">ⓘ About</a>
+    <a href="./index.html">App ↗</a>
+    <a href="https://github.com/arjacobsen1-create/token-estimator">GitHub ↗</a>
+    <a href="https://arjacobsen1-create.github.io/token-minimiser/">Minimiser ↗</a>
+  </nav>
+</div>
+<div class="wrap">
 
   <div class="kpis">
-    <div class="kpi"><div class="n" id="kCost"></div><div class="k">Projected monthly cost</div><div class="s">Whole SAP edition on the frontier default, GPT-6.</div></div>
-    <div class="kpi"><div class="n" id="kCheap"></div><div class="k">Cheapest model for this workload</div><div class="s" id="kCheapName"></div></div>
-    <div class="kpi"><div class="n"><em id="kSave"></em></div><div class="k">Routing savings on offer</div><div class="s">Scenario below: route by task type instead of one model for everything.</div></div>
-    <div class="kpi"><div class="n" id="kVol"></div><div class="k">Monthly request volume</div><div class="s">21 tasks × runs per day × 30 days.</div></div>
+    <div class="kpi"><div class="ic">🛢</div><div class="k">Monthly Projected Cost</div><div class="n" id="kCost"></div><div class="s" id="kCostSub"></div></div>
+    <div class="kpi"><div class="ic">💠</div><div class="k">Cheapest Eligible Model</div><div class="n" id="kCheap" style="font-size:20px;padding-top:3px"></div><div class="s" id="kCheapSub"></div></div>
+    <div class="kpi"><div class="ic">🍃</div><div class="k">Routing Savings</div><div class="n green" id="kSave"></div><div class="s">Optimised routing against the single-model baseline, same tasks, same volume.</div></div>
+    <div class="kpi"><div class="ic">📊</div><div class="k">Monthly Request Volume</div><div class="n" id="kVol"></div><div class="s" id="kVolSub"></div></div>
   </div>
 
-  <div class="card">
-    <h2>Scenario: baseline vs optimised routing</h2>
-    <p class="sub">The business decision this dashboard supports. Baseline runs everything on the frontier model. Optimised keeps quality-critical work (drafting, code) on the frontier and routes high-volume reading work (summarise, classify, extract) to the fast, cheap tier.</p>
-    <div class="scenario">
-      <div class="scen base"><div class="h">Baseline · all GPT-6</div><div class="amt" id="scBase"></div><div class="bar" id="scBaseBar" style="background:#2f6bff"></div><p>One model for everything. Simple, and the most expensive way to run a mixed workload.</p></div>
-      <div class="scen opt"><div class="h">Optimised · routed by task type</div><div class="amt" id="scOpt"></div><div class="bar" id="scOptBar" style="background:#34d399"></div><p>Reading work to Claude Haiku 5.5; drafting and code stay on GPT-6. Same tasks, same volume.</p></div>
+  <div class="grid">
+    <div class="card">
+      <h2><span class="ic">▦</span>Estimate Inputs</h2>
+      <label for="vol">Runs per Day (per task)</label>
+      <input id="vol" type="number" value="10" min="1">
+      <input id="volRange" type="range" min="1" max="100" value="10">
+      <label for="days">Days per Month</label>
+      <select id="days"><option value="20">20</option><option value="30" selected>30</option></select>
+      <label for="routing">Model Routing</label>
+      <select id="routing">
+        <option value="optimised" selected>Optimized (Recommended)</option>
+        <option value="baseline">Baseline (Single Model)</option>
+      </select>
+      <button id="recalc">▦&ensp;Recalculate</button>
+      <p class="note" style="margin-top:12px">The routing choice sets which scenario the headline cost and the donut follow. The chart always shows both.</p>
     </div>
-    <div class="savenote" id="scNote"></div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <h2 style="margin:0"><span class="ic">📊</span>SAP Task Cost Comparison (Monthly)</h2>
+        <div class="legend"><span><span class="dot" style="background:#2f6bff"></span>Baseline (Single Model)</span><span><span class="dot" style="background:#22d3ee"></span>Optimized (Model Routing)</span></div>
+      </div>
+      <div class="chartgrid">
+        <div>
+          <div class="vchart" id="vchart"></div>
+          <div class="vlabels" id="vlabels"></div>
+          <p class="note" id="chartNote" style="margin-top:10px"></p>
+        </div>
+        <div class="totals">
+          <h3>⧉ Total Monthly Cost</h3>
+          <div class="row"><span>Baseline (Single Model)</span><b id="tBase"></b></div>
+          <div class="row"><span>Optimized (Routing)</span><b id="tOpt"></b></div>
+          <div class="save"><div style="font-size:13px;color:var(--muted)">Total Savings</div><span class="amt" id="tSave"></span><span class="badge" id="tBadge"></span></div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="card">
-    <h2>SAP task comparison</h2>
-    <p class="sub">Monthly cost of every SAP task: frontier (cobalt) against the fast tier (cyan). The gap between the bars, task by task, is where the routing decision lives.</p>
-    <div class="legend"><span><span class="dot" style="background:#2f6bff"></span>GPT-6</span><span><span class="dot" style="background:#22d3ee"></span>Claude Haiku 5.5</span></div>
-    <div class="chart" id="sapChart"></div>
-    <p class="note" id="sapTotal"></p>
+  <div class="card" id="scenario" style="margin-bottom:14px">
+    <h2><span class="ic">⚖</span>Scenario Comparison</h2>
+    <div class="scenariogrid">
+      <table>
+        <tr><th>Scenario</th><th>Model Strategy</th><th>Monthly Cost</th><th>Savings</th><th>Change</th></tr>
+        <tr id="rowBase"><td><span class="radio"></span><b>Baseline</b></td><td>Single model (GPT-6)</td><td id="sBase"></td><td>–</td><td>–</td></tr>
+        <tr id="rowOpt"><td><span class="radio"></span><b>Optimized</b></td><td>Model routing (Haiku + GPT-6)</td><td id="sOpt"></td><td id="sSave" style="color:var(--save);font-weight:800"></td><td><span class="badge" id="sBadge" style="margin:0"></span></td></tr>
+      </table>
+      <div class="donutwrap">
+        <div class="donut" id="donut"><div class="hole"><b id="donutAmt"></b><span>Monthly Cost</span></div></div>
+        <div class="dlegend" id="dlegend"></div>
+      </div>
+    </div>
+    <p class="note" style="margin-top:10px">Routing policy: reading work (summarise, classify, extract) goes to the fast tier, Claude Haiku 5.5; drafting and code stay on the frontier model, GPT-6. The donut shows where the selected scenario's money goes, by task.</p>
   </div>
 
-  <div class="card">
-    <h2>Model prices, input vs output</h2>
-    <p class="sub">Dollars per million tokens. Output is the expensive direction, 5x input on the frontier models; that asymmetry is why forecasting the reply matters more than counting the prompt.</p>
-    <div class="legend"><span><span class="dot" style="background:#2f6bff"></span>Input</span><span><span class="dot" style="background:#22d3ee"></span>Output</span></div>
-    <div class="chart" id="priceChart"></div>
+  <div class="card" id="models" style="margin-bottom:14px">
+    <h2><span class="ic">⚙</span>Model Prices, Input vs Output</h2>
+    <p class="note" style="margin:0 0 8px">Dollars per million tokens. Output is priced around 5x input on the frontier models, which is why forecasting the reply matters more than counting the prompt.</p>
+    <div class="legend" style="margin-bottom:4px"><span><span class="dot" style="background:#2f6bff"></span>Input</span><span><span class="dot" style="background:#22d3ee"></span>Output</span></div>
+    <div class="hchart" id="priceChart"></div>
   </div>
 
-  <div class="valid">
+  <div class="valid" id="about">
     <span>Proof checks: 13 / 13 passing (JS 4 · SAP 3 · Python 6)</span>
     <span>GPT counts exact (o200k_base) · other models labelled estimates</span>
     <span>Accuracy method and error table: ACCURACY.md in the repo</span>
@@ -453,64 +515,99 @@ module.exports = { SAP_TASKS, estimateSapTask };
 })();</script>
 <script>
   const sap = module.exports;
-  const ROUTE_TO_CHEAP = { summarise: 1, classify: 1, extract: 1 };
-
-  function bars(el, rows, max, colourFn, fmt) {
-    el.innerHTML = rows.map(r =>
-      '<div class="crow"><div class="nm">' + r.name + '</div><div class="track"><div class="pair">' +
-      r.segs.map((s, i) => '<div style="width:' + Math.max(0.5, (s / max) * 100) + '%;background:' + colourFn(i) + '"></div>').join('') +
-      '</div></div><div class="val">' + fmt(r) + '</div></div>').join('');
-  }
+  const ROUTE = { summarise: 1, classify: 1, extract: 1 };
+  const SLICE_COLOURS = ['#2f6bff', '#22d3ee', '#34d399', '#38bdf8', '#a78bfa', '#64748b'];
+  const $ = id => document.getElementById(id);
+  const money = v => '$' + v.toFixed(2);
 
   function draw() {
-    const vol = Math.max(1, parseInt(document.getElementById('vol').value || '1', 10));
-    let base = 0, cheap = 0, opt = 0;
-    const rows = sap.SAP_TASKS.map(t => {
-      const g = sap.estimateSapTask(t.id, 'gpt-6', vol).estimate.costPerMonth;
-      const h = sap.estimateSapTask(t.id, 'claude-haiku-5-5', vol).estimate.costPerMonth;
-      base += g; cheap += h; opt += ROUTE_TO_CHEAP[t.taskType] ? h : g;
-      return { name: t.id + ' ' + t.name, segs: [g, h], g, h };
-    }).sort((a, b) => b.g - a.g);
+    const vol = Math.max(1, parseInt($('vol').value || '1', 10));
+    const days = parseInt($('days').value, 10);
+    const routing = $('routing').value;
+    $('volRange').value = Math.min(100, vol);
 
-    document.getElementById('kCost').textContent = '$' + base.toFixed(2) + '/mo';
-    document.getElementById('kCheap').textContent = '$' + cheap.toFixed(2) + '/mo';
-    document.getElementById('kCheapName').textContent = 'Claude Haiku 5.5, the fast tier, priced across the same 21 tasks.';
-    document.getElementById('kSave').textContent = '$' + (base - opt).toFixed(2) + '/mo';
-    document.getElementById('kVol').textContent = (21 * vol * 30).toLocaleString();
+    let base = 0, opt = 0, cheap = 0;
+    const per = sap.SAP_TASKS.map(t => {
+      const g = sap.estimateSapTask(t.id, 'gpt-6', 1).estimate.costPerRun * vol * days;
+      const h = sap.estimateSapTask(t.id, 'claude-haiku-5-5', 1).estimate.costPerRun * vol * days;
+      const o = ROUTE[t.taskType] ? h : g;
+      base += g; opt += o; cheap += h;
+      return { id: t.id, name: t.name, g, h, o };
+    });
+    const save = base - opt, pct = base ? Math.round((save / base) * 100) : 0;
+    const selected = routing === 'optimised' ? opt : base;
 
-    document.getElementById('scBase').textContent = '$' + base.toFixed(2) + '/month';
-    document.getElementById('scOpt').textContent = '$' + opt.toFixed(2) + '/month';
-    document.getElementById('scBaseBar').style.width = '100%';
-    document.getElementById('scOptBar').style.width = Math.max(2, (opt / base) * 100) + '%';
-    document.getElementById('scNote').innerHTML =
-      '<b>Routing saves $' + (base - opt).toFixed(2) + ' a month (' + Math.round((1 - opt / base) * 100) +
-      '% of the baseline)</b> on this workload at ' + vol + ' runs a day per task, with no task removed and no volume changed. The only change is which model does which job.';
+    $('kCost').textContent = money(selected);
+    $('kCostSub').textContent = (routing === 'optimised' ? 'Optimised routing' : 'Baseline, single model') +
+      ' · SAP edition, ' + vol + ' runs/day × ' + days + ' days.';
+    $('kCheap').textContent = 'Claude Haiku 5.5';
+    $('kCheapSub').textContent = money(cheap) + '/month if the whole workload ran on the fast tier.';
+    $('kSave').innerHTML = money(save) + '<span class="badge">↓ ' + pct + '%</span>';
+    $('kVol').textContent = (21 * vol * days).toLocaleString();
+    $('kVolSub').textContent = '21 tasks × ' + vol + ' runs/day × ' + days + ' days.';
 
-    bars(document.getElementById('sapChart'), rows, rows[0].g, i => i ? '#22d3ee' : '#2f6bff',
-      r => '$' + r.g.toFixed(2) + ' / $' + r.h.toFixed(2));
-    document.getElementById('sapTotal').textContent =
-      'Edition total at ' + vol + ' runs a day each: $' + base.toFixed(2) + '/month on GPT-6 vs $' +
-      cheap.toFixed(2) + '/month on Haiku 5.5.';
+    $('tBase').textContent = money(base);
+    $('tOpt').textContent = money(opt);
+    $('tSave').textContent = money(save);
+    $('tBadge').textContent = '↓ ' + pct + '%';
 
-    const priceRows = Object.values(core.MODELS).map(m => ({
-      name: m.label, segs: [m.inputPerMillion, m.outputPerMillion], i: m.inputPerMillion, o: m.outputPerMillion
-    }));
-    bars(document.getElementById('priceChart'), priceRows, 25, i => i ? '#22d3ee' : '#2f6bff',
-      r => '$' + r.i.toFixed(2) + ' / $' + r.o.toFixed(2));
+    $('sBase').textContent = money(base);
+    $('sOpt').textContent = money(opt);
+    $('sSave').textContent = money(save);
+    $('sBadge').textContent = '↓ ' + pct + '%';
+    $('rowBase').className = routing === 'baseline' ? 'sel' : '';
+    $('rowOpt').className = routing === 'optimised' ? 'sel' : '';
+
+    const top = [...per].sort((a, b) => (b.g - b.o) - (a.g - a.o) || b.g - a.g).slice(0, 6);
+    const max = top[0].g;
+    $('vchart').innerHTML = top.map(t =>
+      '<div class="vgroup"><div class="vbars">' +
+      '<div class="vbar" style="height:' + Math.max(2, (t.g / max) * 100) + '%;background:#2f6bff"><span>' + money(t.g) + '</span></div>' +
+      '<div class="vbar c" style="height:' + Math.max(2, (t.o / max) * 100) + '%;background:#22d3ee"><span>' + money(t.o) + '</span></div>' +
+      '</div></div>').join('');
+    $('vlabels').innerHTML = top.map(t => '<div>' + t.name + '</div>').join('');
+    $('chartNote').textContent = 'The six tasks where routing saves the most at this volume. Drafting and code tasks stay on the frontier model under the routing policy, so their two bars match. Every task is priced in the totals; the full list lives in the app and in SAP-TASKS.md in the repo.';
+
+    const key = routing === 'optimised' ? 'o' : 'g';
+    const slices = [...per].sort((a, b) => b[key] - a[key]);
+    const topSlices = slices.slice(0, 5);
+    const rest = slices.slice(5).reduce((s, t) => s + t[key], 0);
+    const parts = topSlices.map(t => ({ name: t.name, v: t[key] }));
+    if (rest > 0) parts.push({ name: 'All other tasks', v: rest });
+    let acc = 0; const stops = parts.map((pt, i) => {
+      const from = (acc / selected) * 100; acc += pt.v; const to = (acc / selected) * 100;
+      return SLICE_COLOURS[i % SLICE_COLOURS.length] + ' ' + from + '% ' + to + '%';
+    });
+    $('donut').style.background = 'conic-gradient(' + stops.join(',') + ')';
+    $('donutAmt').textContent = money(selected);
+    $('dlegend').innerHTML = parts.map((pt, i) =>
+      '<div><span class="dot" style="background:' + SLICE_COLOURS[i % SLICE_COLOURS.length] + '"></span>' + pt.name + '<b>' +
+      Math.round((pt.v / selected) * 100) + '%</b></div>').join('');
+
+    const priceRows = Object.values(core.MODELS);
+    const pmax = Math.max(...priceRows.map(m => m.outputPerMillion));
+    $('priceChart').innerHTML = priceRows.map(m =>
+      '<div class="crow"><div>' + m.label + '</div><div class="track"><div class="pair">' +
+      '<div style="width:' + (m.inputPerMillion / pmax * 100) + '%;background:#2f6bff"></div>' +
+      '<div style="width:' + (m.outputPerMillion / pmax * 100) + '%;background:#22d3ee"></div></div></div>' +
+      '<div class="val">$' + m.inputPerMillion.toFixed(2) + ' / $' + m.outputPerMillion.toFixed(2) + '</div></div>').join('');
   }
-  document.getElementById('recalc').addEventListener('click', draw);
+  $('recalc').addEventListener('click', draw);
+  $('volRange').addEventListener('input', () => { $('vol').value = $('volRange').value; draw(); });
+  $('days').addEventListener('change', draw);
+  $('routing').addEventListener('change', draw);
   draw();
   window.__refresh = draw;
 </script>
 <script>
   (function () {
     var note = document.createElement('p');
-    note.className = 'note'; note.style.marginTop = '10px'; note.style.color = '#bae6fd';
+    note.className = 'note'; note.style.margin = '12px 2px 0'; note.style.color = '#7dd3fc';
     note.textContent = 'Counting: loading the real tokenizer…';
-    document.querySelector('header .in').appendChild(note);
+    document.querySelector('.wrap').appendChild(note);
     import('https://unpkg.com/gpt-tokenizer@4.1.0/esm/encoding/o200k_base.js')
-      .then(function (m) {
-        core.setExactCounter(function (t) { return m.encode(t).length; });
+      .then(function (mm) {
+        core.setExactCounter(function (t) { return mm.encode(t).length; });
         note.textContent = 'Counting: GPT models use the real o200k_base tokenizer — exact. Other models are estimates; measured errors are published in ACCURACY.md in the repo.';
         if (window.__refresh) window.__refresh();
       })
