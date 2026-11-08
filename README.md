@@ -146,3 +146,8 @@ the real tokenizers on a golden set and the full error table is published
 in ACCURACY.md (short prose within about ±12%, code and JSON much worse,
 which is exactly why the exact path exists). The Python port wires in
 tiktoken the same way.
+
+## Licence
+
+Open source under the MIT License. Copyright (c) 2026 Anahita Jacobsen.
+See the [LICENSE](LICENSE) file in this repo.
