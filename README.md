@@ -41,6 +41,19 @@ node src/demo.js
 Public prototype, in development. A working prototype also exists as a web app;
 this repo is the real codebase that will be packaged for the App Store.
 
+## SAP & Transformation edition
+
+The domain edition lives in `src/domain-sap.js`: 21 shapes of SAP work
+(Run, Build, Transform), each with a typical input size, guidance, and the
+protection to apply before pasting anything into a model. The human-readable
+list is [SAP-TASKS.md](SAP-TASKS.md). Built from public SAP work shapes
+only — no client input, no ticket content, no system data.
+
+```
+node src/sap-demo.js      the whole edition, priced on two models
+node test/sap-edition.js  the proof the edition is sound (3 checks)
+```
+
 ## Live demo
 
 **https://arjacobsen1-create.github.io/token-estimator/** — the app running in your browser, on the same engine as `src/`.
