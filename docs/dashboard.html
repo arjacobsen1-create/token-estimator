@@ -153,7 +153,6 @@
         <option value="optimised" selected>Optimized (Recommended)</option>
         <option value="baseline">Baseline (Single Model)</option>
       </select>
-      <button id="recalc">▦&ensp;Recalculate</button>
       <p class="note" style="margin-top:12px">The routing choice sets which scenario the headline cost and the donut follow. The chart always shows both.</p>
     </div>
 
@@ -243,7 +242,6 @@
           <option value="1000000">1,000,000 tokens</option>
         </select>
         <label class="chk"><input type="checkbox" id="wfCache"> Prompt caching (idealised reuse)</label>
-        <button id="wfRecalc">⇶&ensp;Recalculate</button>
       </div>
       <div>
         <div class="wfhead">
@@ -999,7 +997,6 @@ module.exports = { SAP_TASKS, estimateSapTask };
       '<div style="width:' + (m.outputPerMillion / pmax * 100) + '%;background:#22d3ee"></div></div></div>' +
       '<div class="val">$' + m.inputPerMillion.toFixed(2) + ' / $' + m.outputPerMillion.toFixed(2) + '</div></div>').join('');
   }
-  $('recalc').addEventListener('click', draw);
   $('volRange').addEventListener('input', () => { $('vol').value = $('volRange').value; draw(); });
   $('vol').addEventListener('input', () => { const v = parseInt($('vol').value, 10); if (isNaN(v)) return; $('volRange').value = Math.min(100, Math.max(1, v)); draw(); });
   $('days').addEventListener('change', draw);
@@ -1100,7 +1097,9 @@ module.exports = { SAP_TASKS, estimateSapTask };
       $w(id).addEventListener('change', drawWf);
     });
     $w('wfCache').addEventListener('change', drawWf);
-    $w('wfRecalc').addEventListener('click', drawWf);
+    ['wfSteps', 'wfC0', 'wfA', 'wfR', 'wfReason', 'wfRuns'].forEach(id => {
+      $w(id).addEventListener('input', drawWf);
+    });
     drawWf();
   })();
 </script>
