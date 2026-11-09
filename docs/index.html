@@ -45,6 +45,40 @@
   .note{font-size:13px;color:var(--muted);line-height:1.5}
   @media(max-width:640px){.steps{grid-template-columns:1fr}.row{grid-template-columns:1fr}}
 </style>
+
+<style>
+  .cm{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+  .cm-eyebrow{color:#40d8ee;font-size:11px;font-weight:700;letter-spacing:.08em;margin:0}
+  .cm h3.cm-h{font-size:22px;margin:9px 0 4px}
+  .cm-keeper{color:#afc3df;font-size:13px;line-height:1.5;margin:0}
+  .cm-shared{display:grid;grid-template-columns:1.25fr .8fr .7fr;gap:7px;margin:13px 0 12px;padding:9px 8px;border:1px solid #1c8ba9;border-radius:10px;background:#102540}
+  .cm-shared label{display:block;color:#8eb6d0;font-size:10px;font-weight:600;margin:0 0 4px;white-space:nowrap}
+  .cm-shared select,.cm-shared input{width:100%;height:33px;min-width:0;border:1px solid #385678;border-radius:7px;background:#07182c;color:#eaf3ff;padding:5px 6px;font-size:12px;margin:0;appearance:textfield}
+  .cm-shared input::-webkit-inner-spin-button{appearance:none}
+  .cm-tabs{display:flex;gap:5px;background:#102540;padding:5px;border-radius:10px}
+  .cm-tab{flex:1;appearance:none;background:transparent;border:none;border-radius:8px;padding:11px 4px;color:#bfd1e7;font-weight:700;font-size:14px;text-align:center;cursor:pointer;margin:0;font-family:inherit}
+  .cm-tab.on{background:#1759cf;color:#fff}
+  .cm-panel{display:none;background:#102540;border:1px solid #284466;border-radius:12px;padding:13px;margin-top:12px}
+  .cm-panel.on{display:block}
+  .cm-panel-h{font-size:15px;margin:0 0 12px;color:var(--ink);font-weight:700}
+  .cm-fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .cm-full{grid-column:1/-1}
+  .cm-fgrid label{display:block;font-size:12px;color:#bfd1e7;margin:0 0 5px}
+  .cm-panel input,.cm-panel select{width:100%;background:#07182c;color:#fff;border:1px solid #385678;border-radius:8px;padding:10px;font-size:14px;min-width:0;margin:0}
+  .cm-hr{border:0;border-top:1px solid #284466;margin:19px 0 14px}
+  .cm-comp-h{font-size:15px;margin:0 0 4px;color:var(--ink);font-weight:700}
+  .cm-table{width:100%;border-collapse:collapse;font-size:12.5px}
+  .cm-table th,.cm-table td{padding:10px 4px;text-align:right;border-bottom:1px solid #284466;color:var(--ink);font-size:12.5px}
+  .cm-table th:first-child,.cm-table td:first-child{text-align:left}
+  .cm-table th{color:#afc3df;font-weight:500;text-transform:none}
+  .cm-agent-link{appearance:none;background:none;border:none;padding:0;margin:0;cursor:pointer;color:#40d8ee;font-weight:600;font-size:12.5px;font-family:inherit}
+  .cm-best td{background:rgba(52,211,153,.10)}
+  .cm-pill{display:inline-block;background:rgba(52,211,153,.15);color:#34d399;border:1px solid rgba(52,211,153,.45);font-size:10.5px;border-radius:999px;padding:1px 7px;margin-left:6px;white-space:nowrap}
+  .cm-pill[hidden]{display:none}
+  .cm-how{margin-top:14px}
+  .cm-how summary{cursor:pointer;color:#40d8ee;font-weight:700;font-size:13px}
+  .cm-how p{font-size:12.5px;color:var(--muted);line-height:1.55;margin:8px 0 0}
+</style>
 </head>
 <body>
 <header><div class="in">
@@ -139,6 +173,66 @@
       <p class="note" id="sapGuide"></p>
       <p class="note" id="sapProt"></p>
     </div>
+  </div>
+
+  <div class="card" id="workflows">
+    <h2>Workflows — Compare my agents</h2>
+  <div class="cm" id="compare">
+    <p class="cm-eyebrow">WORKFLOWS / COMPARE</p>
+    <h3 class="cm-h">Compare my agents</h3>
+    <p class="cm-keeper">Same job. Different agent configurations. Compare estimated token usage and cost.</p>
+    <div class="cm-shared" aria-label="Shared workload for all agents">
+      <div><label for="cmTask">Job</label><select id="cmTask"></select></div>
+      <div><label for="cmRuns">Runs/day</label><input id="cmRuns" type="number" min="1" value="200"></div>
+      <div><label for="cmDays">Days/mo</label><select id="cmDays"><option value="20">20</option><option value="30" selected>30</option></select></div>
+    </div>
+    <div class="cm-tabs">
+      <button type="button" class="cm-tab on" id="cmTab0" data-agent="0">Agent A</button>
+      <button type="button" class="cm-tab" id="cmTab1" data-agent="1">Agent B</button>
+      <button type="button" class="cm-tab" id="cmTab2" data-agent="2">Agent C</button>
+    </div>
+    <div class="cm-panel on" id="cmPanel0">
+      <h4 class="cm-panel-h">Agent A configuration</h4>
+      <div class="cm-fgrid">
+        <div class="cm-full"><label for="cmModel0">Model</label><select id="cmModel0"></select></div>
+        <div><label for="cmSteps0">Steps</label><input id="cmSteps0" type="number" value="6" min="1" max="200"></div>
+        <div><label for="cmC00">Starting tokens</label><input id="cmC00" type="number" value="6000" min="0"></div>
+        <div><label for="cmA0">History / step</label><input id="cmA0" type="number" value="1500" min="0"></div>
+        <div><label for="cmMode0">Context mode</label><select id="cmMode0"><option value="full" selected>Full carry</option><option value="summarised">Summarised</option><option value="windowed">Windowed</option></select></div>
+      </div>
+    </div>
+    <div class="cm-panel" id="cmPanel1">
+      <h4 class="cm-panel-h">Agent B configuration</h4>
+      <div class="cm-fgrid">
+        <div class="cm-full"><label for="cmModel1">Model</label><select id="cmModel1"></select></div>
+        <div><label for="cmSteps1">Steps</label><input id="cmSteps1" type="number" value="5" min="1" max="200"></div>
+        <div><label for="cmC01">Starting tokens</label><input id="cmC01" type="number" value="4000" min="0"></div>
+        <div><label for="cmA1">History / step</label><input id="cmA1" type="number" value="1000" min="0"></div>
+        <div><label for="cmMode1">Context mode</label><select id="cmMode1"><option value="full">Full carry</option><option value="summarised" selected>Summarised</option><option value="windowed">Windowed</option></select></div>
+      </div>
+    </div>
+    <div class="cm-panel" id="cmPanel2">
+      <h4 class="cm-panel-h">Agent C configuration</h4>
+      <div class="cm-fgrid">
+        <div class="cm-full"><label for="cmModel2">Model</label><select id="cmModel2"></select></div>
+        <div><label for="cmSteps2">Steps</label><input id="cmSteps2" type="number" value="8" min="1" max="200"></div>
+        <div><label for="cmC02">Starting tokens</label><input id="cmC02" type="number" value="6000" min="0"></div>
+        <div><label for="cmA2">History / step</label><input id="cmA2" type="number" value="1500" min="0"></div>
+        <div><label for="cmMode2">Context mode</label><select id="cmMode2"><option value="full">Full carry</option><option value="summarised">Summarised</option><option value="windowed" selected>Windowed</option></select></div>
+      </div>
+    </div>
+    <hr class="cm-hr">
+    <h4 class="cm-comp-h">Comparison</h4>
+    <table class="cm-table">
+      <thead><tr><th>Agent</th><th>Tokens / run</th><th>Cost / run</th><th>Monthly</th></tr></thead>
+      <tbody>
+        <tr id="cmRow0"><td><button type="button" class="cm-agent-link" id="cmCell0" data-agent="0">Agent A</button><span class="cm-pill" id="cmPill0" hidden>Lowest estimated cost</span></td><td id="cmTok0"></td><td id="cmCost0"></td><td id="cmMon0"></td></tr>
+        <tr id="cmRow1"><td><button type="button" class="cm-agent-link" id="cmCell1" data-agent="1">Agent B</button><span class="cm-pill" id="cmPill1" hidden>Lowest estimated cost</span></td><td id="cmTok1"></td><td id="cmCost1"></td><td id="cmMon1"></td></tr>
+        <tr id="cmRow2"><td><button type="button" class="cm-agent-link" id="cmCell2" data-agent="2">Agent C</button><span class="cm-pill" id="cmPill2" hidden>Lowest estimated cost</span></td><td id="cmTok2"></td><td id="cmCost2"></td><td id="cmMon2"></td></tr>
+      </tbody>
+    </table>
+    <details class="cm-how"><summary>How this works</summary><p>Each agent is priced by the same Workflows engine: at every step the model receives the starting context plus whatever history its context mode carries, and that history is billed again. Retries use the Workflows default of 10%; retries are billed. A failed call is billed in full and retried, so retries multiply the main calls; in Summarised mode the summary calls on the fast tier are included in both the cost and the token count. The reply at each step is predicted from the shared task type, the same prediction Workflows uses. Prices are the published reference prices used everywhere in this app, not live supplier quotations. This compares estimated consumption only: a lower estimated cost does not establish that an agent does the job better.</p></details>
+  </div>
   </div>
 
   <p class="note">Full code, lesson notes and runnable proofs (<i>node test/smoke.js</i>, <i>node test/sap-edition.js</i>, <i>node test/workflows.js</i>, <i>node test/shared-parity.js</i>) are in the repository. Prices are editable defaults in the code, verify against the provider before relying on a figure. GPT-family counts are exact once the real tokenizer loads (see the note in the header); other models are estimates with measured errors published in ACCURACY.md in the repo.</p>
@@ -1518,5 +1612,82 @@ module.exports = {
   })();
 </script>
 <p style="text-align:center;font-size:12px;color:#7d90b8;padding:20px 12px 28px;margin:0">Open source under the <a href="https://github.com/arjacobsen1-create/token-estimator" style="color:#22d3ee">MIT License</a> · © 2026 Anahita Jacobsen</p>
+
+<script>
+  (function () {
+    const $c = id => document.getElementById(id);
+    const moneyC = v => '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const DEFAULT_MODELS = ['claude-opus-5', 'gpt-6', 'claude-haiku-5-5'];
+    let cmActive = 0;
+
+    $c('cmTask').innerHTML = Object.entries(core.TASK_TYPES).map(([id, t]) =>
+      '<option value="' + id + '"' + (id === 'chat' ? ' selected' : '') + '>' + t.label + '</option>').join('');
+    for (let i = 0; i < 3; i++) {
+      $c('cmModel' + i).innerHTML = Object.entries(core.MODELS).map(([id, m]) =>
+        '<option value="' + id + '">' + m.label + '</option>').join('');
+      $c('cmModel' + i).value = DEFAULT_MODELS[i];
+    }
+
+    function setAgent(i) {
+      cmActive = i;
+      for (let j = 0; j < 3; j++) {
+        $c('cmTab' + j).className = 'cm-tab' + (j === cmActive ? ' on' : '');
+        $c('cmPanel' + j).className = 'cm-panel' + (j === cmActive ? ' on' : '');
+      }
+    }
+
+    function drawCompare() {
+      // Workload comes from the skinny shared strip inside this block:
+      // the same job, runs/day and days for every agent.
+      const task = core.TASK_TYPES[$c('cmTask').value] || core.TASK_TYPES.chat;
+      const runs = Math.max(1, parseInt($c('cmRuns').value || '1', 10));
+      const days = parseInt($c('cmDays').value, 10);
+      const results = [];
+      for (let i = 0; i < 3; i++) {
+        const c0 = Math.max(0, parseInt($c('cmC0' + i).value || '0', 10));
+        // Reply prediction: the same rule the Workflows mode applies —
+        // a fixed size where the task type has one, else a share of the
+        // starting context.
+        const reply = task.fixedOutput ? task.fixedOutput : Math.round(c0 * task.outputRatio);
+        const r = core.estimateWorkflow({
+          modelId: $c('cmModel' + i).value,
+          steps: Math.max(1, parseInt($c('cmSteps' + i).value || '1', 10)),
+          startContext: c0,
+          growthPerStep: Math.max(0, parseInt($c('cmA' + i).value || '0', 10)),
+          replyTokens: reply,
+          retryRate: 0.10, // inherited: the Workflows default (wfRetry, 10%) for every agent
+          runsPerDay: runs,
+          daysPerMonth: days,
+        });
+        const mode = $c('cmMode' + i).value;
+        const m = r.modes[mode];
+        let tokens = m.inputTokens + m.outputTokens;
+        if (mode === 'summarised') tokens += m.summaryInputTokens + m.summaryOutputTokens;
+        results.push({ tokens, cost: m.costPerRun, monthly: m.costPerMonth });
+      }
+      let best = 0;
+      for (let i = 1; i < 3; i++) if (results[i].cost < results[best].cost) best = i;
+      for (let i = 0; i < 3; i++) {
+        $c('cmTok' + i).textContent = Math.round(results[i].tokens).toLocaleString('en-US');
+        $c('cmCost' + i).textContent = moneyC(results[i].cost);
+        $c('cmMon' + i).textContent = moneyC(results[i].monthly);
+        $c('cmPill' + i).hidden = i !== best;
+        $c('cmRow' + i).className = i === best ? 'cm-best' : '';
+      }
+    }
+
+    for (let i = 0; i < 3; i++) {
+      $c('cmTab' + i).addEventListener('click', () => setAgent(i));
+      $c('cmCell' + i).addEventListener('click', () => setAgent(i));
+    }
+    const cmIds = ['cmTask', 'cmRuns', 'cmDays'];
+    for (let i = 0; i < 3; i++) cmIds.push('cmModel' + i, 'cmSteps' + i, 'cmC0' + i, 'cmA' + i, 'cmMode' + i);
+    cmIds.forEach(id => {
+      $c(id).addEventListener('input', drawCompare);
+      $c(id).addEventListener('change', drawCompare);
+    });
+    drawCompare();
+  })();
+</script>
 </body>
 </html>
