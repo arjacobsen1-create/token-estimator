@@ -60,6 +60,8 @@
   .sap-cat.on{background:#1759cf;color:#fff}
   .row.sap-row{grid-template-columns:1fr 1fr}
   .sap-about{margin-top:16px}
+  .sap-about-h{font-size:13px;font-weight:700;color:#40d8ee;margin:0}
+  .sap-about-p{font-size:12.5px;color:var(--muted);line-height:1.55;margin:8px 0 0}
   @media(max-width:640px){.pg-title{font-size:12.5px}.pg-sub{font-size:10px}.row.sap-row{grid-template-columns:1fr 1fr}}
   @media(max-width:640px){.steps{grid-template-columns:1fr}.row{grid-template-columns:1fr}}
 </style>
@@ -116,13 +118,13 @@
   <div class="steps">
     <div class="step" data-goto="estimator" role="button" tabindex="0"><b>1 · Estimate.</b> Paste the context and the question. Get the token count, where the tokens sit, and the price on every model.</div>
     <div class="step" data-goto="models" role="button" tabindex="0"><b>2 · Workflows.</b> Pick the model that should do the job, then compare several agents doing the same job, side by side.</div>
-    <div class="step" data-goto="sap" role="button" tabindex="0"><b>3 · SAP Edition.</b> 21 pre-sized SAP tasks, Run, Build and Transform, each with guidance and the protection to apply before pasting anything into a model.</div>
+    <div class="step" data-goto="sap" role="button" tabindex="0"><b>3 · Insights.</b> 21 pre-sized SAP tasks, Run, Build and Transform, each with guidance and the protection to apply before pasting anything into a model.</div>
   </div>
 
   <div class="pg-tiles" role="tablist" aria-label="Sections">
     <button type="button" class="pg-tab on" id="pgTab-estimator" data-tab="estimator" role="tab" aria-selected="true" aria-controls="estimator"><span class="pg-glyph">▦</span><span class="pg-title">Estimate</span><span class="pg-sub">Task cost</span></button>
     <button type="button" class="pg-tab" id="pgTab-models-workflows" data-tab="models-workflows" role="tab" aria-selected="false" aria-controls="models-workflows"><span class="pg-glyph">⇶</span><span class="pg-title">Workflows</span><span class="pg-sub">Models &amp; agents</span></button>
-    <button type="button" class="pg-tab" id="pgTab-sap-about" data-tab="sap-about" role="tab" aria-selected="false" aria-controls="sap-about"><span class="pg-glyph">☰</span><span class="pg-title">SAP Edition</span><span class="pg-sub">Specialist tasks</span></button>
+    <button type="button" class="pg-tab" id="pgTab-sap-about" data-tab="sap-about" role="tab" aria-selected="false" aria-controls="sap-about"><span class="pg-glyph">☰</span><span class="pg-title">Insights</span><span class="pg-sub">Specialist tasks</span></button>
   </div>
 
   <div class="card pg-panel on" id="estimator" role="tabpanel">
@@ -246,7 +248,7 @@
 
   <div class="pg-panel" id="sap-about" role="tabpanel">
   <div class="card" id="sap">
-    <h2>SAP Edition</h2>
+    <h2>The SAP workload</h2>
     <p class="sub">Estimate AI token consumption for common SAP support, implementation and transformation tasks.</p>
     <p class="note" style="margin:0">Built from public SAP work shapes only. Full list: SAP-TASKS.md in the repo.</p>
     <div class="sap-chips"><span class="sap-chip">21 task presets</span><span class="sap-chip">Run · Build · Transform</span></div>
@@ -268,7 +270,7 @@
       <p class="note" id="sapGuide"></p>
       <p class="note" id="sapProt"></p>
     </div>
-    <details class="cm-how sap-about" id="about"><summary>About this app</summary><p>Full code, lesson notes and runnable proofs (<i>node test/smoke.js</i>, <i>node test/sap-edition.js</i>, <i>node test/workflows.js</i>, <i>node test/shared-parity.js</i>) are in the repository. Prices are editable defaults in the code, verify against the provider before relying on a figure. GPT-family counts are exact once the real tokenizer loads (see the note in the header); other models are estimates with measured errors published in ACCURACY.md in the repo.</p></details>
+    <section class="sap-about" id="about"><h3 class="sap-about-h">About this app</h3><p class="sap-about-p">Full code, lesson notes and runnable proofs (<i>node test/smoke.js</i>, <i>node test/sap-edition.js</i>, <i>node test/workflows.js</i>, <i>node test/shared-parity.js</i>) are in the repository. Prices are editable defaults in the code, verify against the provider before relying on a figure. GPT-family counts are exact once the real tokenizer loads (see the note in the header); other models are estimates with measured errors published in ACCURACY.md in the repo.</p></section>
   </div>
   </div>
 </div>
@@ -1753,9 +1755,10 @@ module.exports = {
       'workflows': { tab: 'models-workflows', scroll: 'workflows' },
       'sap-about': { tab: 'sap-about' },
       'sap': { tab: 'sap-about' },
-      'about': { tab: 'sap-about', scroll: 'about', open: 'about' }
+      'insights': { tab: 'sap-about' },
+      'about': { tab: 'sap-about', scroll: 'about' }
     };
-    function activate(key, hashToWrite, scrollId, openId) {
+    function activate(key, hashToWrite, scrollId) {
       if (KEYS.indexOf(key) < 0) key = 'estimator';
       KEYS.forEach(function (k) {
         var on = k === key;
@@ -1764,10 +1767,6 @@ module.exports = {
         var panel = document.getElementById(k);
         if (panel) panel.classList.toggle('on', on);
       });
-      if (openId) {
-        var det = document.getElementById(openId);
-        if (det && 'open' in det) det.open = true;
-      }
       if (scrollId) {
         var target = document.getElementById(scrollId);
         if (target) target.scrollIntoView();
@@ -1775,13 +1774,13 @@ module.exports = {
       if (hashToWrite && window.history && history.replaceState) history.replaceState(null, '', '#' + hashToWrite);
     }
     KEYS.forEach(function (k) {
-      document.getElementById('pgTab-' + k).addEventListener('click', function () { activate(k, k, null, null); });
+      document.getElementById('pgTab-' + k).addEventListener('click', function () { activate(k, k, null); });
     });
     document.querySelectorAll('.step[data-goto]').forEach(function (el) {
       var go = function () {
         var h = el.getAttribute('data-goto');
         var r = ROUTES[h] || ROUTES.estimator;
-        activate(r.tab, h, r.scroll || null, r.open || null);
+        activate(r.tab, h, r.scroll || null);
       };
       el.addEventListener('click', go);
       el.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
@@ -1789,7 +1788,7 @@ module.exports = {
     function fromHash() {
       var h = (location.hash || '').replace('#', '');
       var r = ROUTES[h] || ROUTES.estimator;
-      activate(r.tab, null, r.scroll || null, r.open || null);
+      activate(r.tab, null, r.scroll || null);
     }
     window.addEventListener('hashchange', fromHash);
     fromHash();
