@@ -147,6 +147,13 @@
   .cm-how{margin-top:14px}
   .cm-how summary{cursor:pointer;color:#40d8ee;font-weight:700;font-size:13px}
   .cm-how p{font-size:12.5px;color:var(--muted);line-height:1.55;margin:8px 0 0}
+  .pg-tabs{display:flex;gap:5px;background:#102540;padding:5px;border-radius:10px;margin:0 0 14px;flex-wrap:wrap}
+  .pg-tab{flex:1 1 0;appearance:none;background:transparent;border:none;border-radius:8px;padding:11px 6px;color:#bfd1e7;font-weight:700;font-size:14px;text-align:center;cursor:pointer;margin:0;font-family:inherit;white-space:nowrap}
+  @media(max-width:900px){.pg-tab{flex:1 1 40%}}
+  .pg-tab.on{background:#1759cf;color:#fff}
+  .pg-panel{display:none}
+  .pg-panel.on{display:block}
+  .grid.pg-panel.on{display:grid}
 </style>
 </head>
 <body>
@@ -160,26 +167,27 @@
     </div>
   </div>
   <nav class="tabs">
-    <a class="on" href="./dashboard.html">▦ Estimator</a>
-    <a href="#workflows">⇶ Workflows</a>
-    <a href="#minimiser">✂ Minimiser</a>
-    <a href="#scenario">⧉ Scenarios</a>
-    <a href="#models">⚙ Models</a>
-    <a href="#measures">ⓘ About</a>
     <a class="util" href="./index.html">App ↗</a>
     <a class="util" href="https://github.com/arjacobsen1-create/token-estimator">GitHub ↗</a>
   </nav>
 </div>
 <div class="wrap">
 
-  <div class="kpis">
+  <div class="pg-tabs" role="tablist" aria-label="Sections">
+    <button type="button" class="pg-tab on" id="pgTab-estimator" data-tab="estimator" role="tab" aria-selected="true" aria-controls="estimator">▦ Estimator</button>
+    <button type="button" class="pg-tab" id="pgTab-workflows" data-tab="workflows" role="tab" aria-selected="false" aria-controls="workflows">⇶ Workflows</button>
+    <button type="button" class="pg-tab" id="pgTab-minimiser" data-tab="minimiser" role="tab" aria-selected="false" aria-controls="minimiser">✂ Minimiser</button>
+    <button type="button" class="pg-tab" id="pgTab-insights" data-tab="insights" role="tab" aria-selected="false" aria-controls="scenario models measures">⧉ Insights</button>
+  </div>
+
+  <div class="grid pg-panel on" id="estimator" role="tabpanel">
+  <div class="kpis" style="grid-column:1/-1">
     <div class="kpi"><div class="ic">🛢</div><div class="k">Monthly Projected Cost</div><div class="n" id="kCost"></div><div class="s" id="kCostSub"></div></div>
-    <div class="kpi"><div class="ic">💠</div><div class="k">Cheapest Eligible Model</div><div class="n" id="kCheap" style="font-size:20px;padding-top:3px"></div><div class="s" id="kCheapSub"></div></div>
+    <div class="kpi"><div class="ic">💠</div><div class="k">Lowest-priced model</div><div class="n" id="kCheap" style="font-size:20px;padding-top:3px"></div><div class="s" id="kCheapSub"></div></div>
     <div class="kpi"><div class="ic">🍃</div><div class="k">Routing Savings</div><div class="n green" id="kSave"></div><div class="s">Optimised routing against the single-model baseline, same tasks, same volume.</div></div>
     <div class="kpi"><div class="ic">📊</div><div class="k">Monthly Request Volume</div><div class="n" id="kVol"></div><div class="s" id="kVolSub"></div></div>
   </div>
-
-  <div class="grid">
+  <p class="note" style="margin:0 0 14px;grid-column:1/-1">Illustrative SAP workload: 21 predefined tasks at equal daily volume. Adjust the assumptions to explore cost and routing differences. Results are estimates, not observed usage.</p>
     <div class="card">
       <h2><span class="ic">▦</span>Estimate Inputs</h2>
       <label for="vol">Runs per Day (per task)</label>
@@ -189,7 +197,7 @@
       <select id="days"><option value="20">20</option><option value="30" selected>30</option></select>
       <label for="routing">Model Routing</label>
       <select id="routing">
-        <option value="optimised" selected>Optimised (Recommended)</option>
+        <option value="optimised" selected>Optimised (Illustrative cost routing)</option>
         <option value="baseline">Baseline (Single Model)</option>
       </select>
       <p class="note" style="margin-top:12px">The routing choice sets which scenario the headline cost and the donut follow. The chart always shows both.</p>
@@ -197,7 +205,7 @@
 
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-        <h2 style="margin:0"><span class="ic">📊</span>SAP Task Cost Comparison (Monthly)</h2>
+        <div><h2 style="margin:0"><span class="ic">📊</span>SAP Task Cost Comparison (Monthly)</h2><div class="note" style="font-size:12px;margin-top:2px">Sample SAP workload</div></div>
         <div class="legend"><span><span class="dot" style="background:#2f6bff"></span>Baseline (Single Model)</span><span><span class="dot" style="background:#22d3ee"></span>Optimised (Model Routing)</span></div>
       </div>
       <div class="chartgrid">
@@ -216,7 +224,7 @@
     </div>
   </div>
 
-  <div class="card" id="scenario" style="margin-bottom:14px">
+  <div class="card pg-panel" id="scenario" role="tabpanel" style="margin-bottom:14px">
     <h2><span class="ic">⚖</span>Scenario Comparison</h2>
     <div class="scenariogrid">
       <div class="tscroll"><table>
@@ -232,7 +240,7 @@
     <p class="note" style="margin-top:10px">Routing policy: reading work (summarise, classify, extract) goes to the fast tier, Claude Haiku 5.5; drafting and code stay on the frontier model, GPT-6 Sol. The donut shows where the selected scenario's money goes, by task.</p>
   </div>
 
-  <div class="card" id="workflows" style="margin-bottom:14px">
+  <div class="card pg-panel" id="workflows" role="tabpanel" style="margin-bottom:14px">
     <h2><span class="ic">⇶</span>Workflows — Multi-step AI Cost Forecasting</h2>
     <p class="note" style="margin:0 0 12px">The estimator above prices one prompt and one reply; a workflow is a multi-step agent run where the history is billed again at every step, and this mode prices the run.</p>
     <details class="how"><summary>How this works</summary><p class="note" style="margin:8px 0 0">At every step the model receives the instruction, the retrieved material and everything the earlier steps produced, and that history is billed again. This mode prices the run, and shows what the way you carry the history costs.</p></details>
@@ -261,6 +269,7 @@
         <label for="wfTask">Reply per step — predicted from task type</label>
         <select id="wfTask"><option value="custom" selected>Custom size</option></select>
         <input id="wfR" type="number" value="600" min="0" style="margin-top:6px">
+        <p class="note" id="wfRNote" style="margin:6px 0 0;display:none"></p>
         <label for="wfReason">Reasoning tokens per step (optional, your estimate)</label>
         <input id="wfReason" type="number" value="0" min="0">
         <label for="wfRetry">Retry rate (share of step calls resent)</label>
@@ -361,7 +370,7 @@
   </div>
   </div>
 
-  <div class="card" id="minimiser" style="margin-bottom:14px">
+  <div class="card pg-panel" id="minimiser" role="tabpanel" style="margin-bottom:14px">
     <h2><span class="ic">✂</span>Minimiser — Reduce the Prompt, Cap the Reply</h2>
     <p class="note" style="margin:0 0 4px;color:var(--cyan);font-weight:700">Use fewer tokens. Preserve the intent.</p>
     <p class="note" style="margin:0 0 12px">Paste a prompt: the minimiser shrinks it and predicts the <b style="color:var(--ink)">reply</b>, because a tiny prompt can trigger a huge, expensive answer.</p>
@@ -401,7 +410,7 @@
     </div>
   </div>
 
-  <div class="card" id="models" style="margin-bottom:14px">
+  <div class="card pg-panel" id="models" role="tabpanel" style="margin-bottom:14px">
     <h2><span class="ic">⚙</span>Model Prices, Input vs Output</h2>
     <p class="note" style="margin:0 0 8px">Dollars per million tokens, checked 8 Nov 2026 against the providers' published pricing pages. Output is priced around 5x input on the frontier models, which is why forecasting the reply matters more than counting the prompt. Where a rate hides a tier or a date, the note under the model says so.</p>
     <div class="legend" style="margin-bottom:4px"><span><span class="dot" style="background:#2f6bff"></span>Input</span><span><span class="dot" style="background:#22d3ee"></span>Output</span></div>
@@ -409,7 +418,7 @@
   </div>
 
 
-  <div class="card" id="measures" style="margin-bottom:14px">
+  <div class="card pg-panel" id="measures" role="tabpanel" style="margin-bottom:14px">
     <h2><span class="ic">ⓘ</span>What this measures, and what it doesn't</h2>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" class="measuregrid">
       <div>
@@ -1037,7 +1046,7 @@ module.exports = { SAP_TASKS, estimateSapTask };
     $('kCostSub').textContent = (routing === 'optimised' ? 'Optimised routing' : 'Baseline, single model') +
       ' · SAP edition, ' + vol + ' runs/day × ' + days + ' days.';
     $('kCheap').textContent = 'Claude Haiku 5.5';
-    $('kCheapSub').textContent = money(cheap) + '/month if the whole workload ran on the fast tier.';
+    $('kCheapSub').textContent = money(cheap) + '/month if the whole workload ran on the fast tier. Price only; nothing here scores the answer.';
     $('kSave').innerHTML = money(save) + '<span class="badge">↓ ' + pct + '%</span>';
     $('kVol').textContent = (21 * vol * days).toLocaleString();
     $('kVolSub').textContent = '21 tasks × ' + vol + ' runs/day × ' + days + ' days.';
@@ -1123,9 +1132,25 @@ module.exports = { SAP_TASKS, estimateSapTask };
       if (p !== 'custom') $w(inputId).value = p;
     }
 
+    // One visible control per value: the number inputs stay hidden unless
+    // their preset is Custom; a named task type shows its predicted reply
+    // size as a static note instead of the reply input.
+    function syncControlVisibility() {
+      $w('wfC0').style.display = $w('wfC0Preset').value === 'custom' ? '' : 'none';
+      $w('wfA').style.display = $w('wfAPreset').value === 'custom' ? '' : 'none';
+      const customReply = $w('wfTask').value === 'custom';
+      $w('wfR').style.display = customReply ? '' : 'none';
+      const note = $w('wfRNote');
+      note.style.display = customReply ? 'none' : '';
+      if (!customReply) {
+        note.textContent = '≈ ' + Math.max(0, parseInt($w('wfR').value || '0', 10)).toLocaleString('en-US') + ' tokens per step, predicted from task type';
+      }
+    }
+
     function drawWf() {
       presetSync('wfC0Preset', 'wfC0');
       presetSync('wfAPreset', 'wfA');
+      syncControlVisibility();
       const limit = parseInt($w('wfLimit').value, 10);
       const r = core.estimateWorkflow({
         modelId: $w('wfModel').value,
@@ -1711,6 +1736,7 @@ module.exports = {
       c0.value = lastReport.after;
       c0.dispatchEvent(new Event('change'));
       $m('mnWfNote').textContent = 'Starting context set to ' + lastReport.after.toLocaleString() + ' tokens: the minimised prompt only. The growth per step in Workflows is unchanged.';
+      if (window.dashActivate) window.dashActivate('workflows', 'workflows');
       document.getElementById('workflows').scrollIntoView({ behavior: 'smooth' });
     });
     drawMin();
@@ -1811,6 +1837,62 @@ module.exports = {
       $c(id).addEventListener('change', drawCompare);
     });
     drawCompare();
+  })();
+</script>
+<script>
+  (function () {
+    var KEYS = ['estimator', 'workflows', 'minimiser', 'insights'];
+    // Tab key -> the existing section element(s) it shows. Ids are the
+    // page's own. The Insights panel groups three cards in page order:
+    // Scenarios (#scenario), Models (#models) and About (#measures).
+    // The Estimator panel is the KPI block + inputs + chart grid.
+    var PANELS = { estimator: ['estimator'], workflows: ['workflows'], minimiser: ['minimiser'], insights: ['scenario', 'models', 'measures'] };
+    // Every accepted hash resolves to a tab; #models and #about also
+    // scroll to their section inside the Insights panel.
+    var ROUTES = {
+      '': { tab: 'estimator' },
+      'estimator': { tab: 'estimator' },
+      'workflows': { tab: 'workflows' },
+      'minimiser': { tab: 'minimiser' },
+      'insights': { tab: 'insights' },
+      'scenario': { tab: 'insights' },
+      'scenarios': { tab: 'insights' },
+      'models': { tab: 'insights', scroll: 'models' },
+      'measures': { tab: 'insights', scroll: 'measures' },
+      'about': { tab: 'insights', scroll: 'measures' }
+    };
+    function activate(key, hashToWrite, scrollId) {
+      if (KEYS.indexOf(key) < 0) key = 'estimator';
+      KEYS.forEach(function (k) {
+        var on = k === key;
+        var tab = document.getElementById('pgTab-' + k);
+        if (tab) { tab.classList.toggle('on', on); tab.setAttribute('aria-selected', on ? 'true' : 'false'); }
+        PANELS[k].forEach(function (pid) {
+          var panel = document.getElementById(pid);
+          if (panel) panel.classList.toggle('on', on);
+        });
+      });
+      if (hashToWrite && window.history && history.replaceState) history.replaceState(null, '', '#' + hashToWrite);
+      if (scrollId) {
+        var target = document.getElementById(scrollId);
+        // Deferred so a browser-native fragment jump (e.g. #about is
+        // also the footer strip's id) cannot override the scroll.
+        if (target) setTimeout(function () { target.scrollIntoView(); }, 60);
+      }
+    }
+    // Used by in-page hand-offs (e.g. the Minimiser's "Use as Workflows
+    // starting context") to switch panels instead of scrolling a long page.
+    window.dashActivate = activate;
+    KEYS.forEach(function (k) {
+      document.getElementById('pgTab-' + k).addEventListener('click', function () { activate(k, k); });
+    });
+    function fromHash() {
+      var h = (location.hash || '').replace('#', '');
+      var r = ROUTES[h] || ROUTES[''];
+      activate(r.tab, null, r.scroll || null);
+    }
+    window.addEventListener('hashchange', fromHash);
+    fromHash();
   })();
 </script>
 </body>
