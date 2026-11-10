@@ -154,6 +154,14 @@
   .pg-panel{display:none}
   .pg-panel.on{display:block}
   .grid.pg-panel.on{display:grid}
+  .card .sub{color:var(--muted);font-size:13.5px;margin:0 0 8px;line-height:1.5}
+  .sap-chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
+  .sap-chip{background:#102540;border:1px solid var(--line);border-radius:999px;padding:4px 11px;font-size:12px;font-weight:600;color:#bfd1e7}
+  .sap-cats{display:flex;gap:5px;background:#102540;padding:5px;border-radius:10px}
+  .sap-cat{flex:1;appearance:none;background:transparent;border:none;border-radius:8px;padding:10px 4px;color:#bfd1e7;font-weight:700;font-size:14px;text-align:center;cursor:pointer;margin:0;font-family:inherit;width:auto}
+  .sap-cat.on{background:#1759cf;color:#fff}
+  .sap-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .total{font-size:19px;font-weight:900;margin-top:12px}
 </style>
 </head>
 <body>
@@ -177,7 +185,7 @@
     <button type="button" class="pg-tab on" id="pgTab-estimator" data-tab="estimator" role="tab" aria-selected="true" aria-controls="estimator">▦ Estimator</button>
     <button type="button" class="pg-tab" id="pgTab-workflows" data-tab="workflows" role="tab" aria-selected="false" aria-controls="workflows">⇶ Workflows</button>
     <button type="button" class="pg-tab" id="pgTab-minimiser" data-tab="minimiser" role="tab" aria-selected="false" aria-controls="minimiser">✂ Minimiser</button>
-    <button type="button" class="pg-tab" id="pgTab-insights" data-tab="insights" role="tab" aria-selected="false" aria-controls="scenario models measures">⧉ Insights</button>
+    <button type="button" class="pg-tab" id="pgTab-insights" data-tab="insights" role="tab" aria-selected="false" aria-controls="scenario models sapwork measures">⧉ Insights</button>
   </div>
 
   <div class="grid pg-panel on" id="estimator" role="tabpanel">
@@ -417,6 +425,34 @@
     <div class="hchart" id="priceChart"></div>
   </div>
 
+  <div class="card pg-panel" id="sapwork" role="tabpanel" style="margin-bottom:14px">
+    <h2><span class="ic">☰</span>The SAP workload</h2>
+    <p class="sub">Estimate AI token consumption for common SAP support, implementation and transformation tasks.</p>
+    <p class="note" style="margin:0">Built from public SAP work shapes only.</p>
+    <div class="sap-chips"><span class="sap-chip">21 task presets</span><span class="sap-chip">Run · Build · Transform</span></div>
+    <label id="dSapCatLabel">Work category</label>
+    <div class="sap-cats" role="group" aria-labelledby="dSapCatLabel">
+      <button type="button" class="sap-cat on" id="dSapCat-Run" data-cat="Run" aria-pressed="true">Run</button>
+      <button type="button" class="sap-cat" id="dSapCat-Build" data-cat="Build" aria-pressed="false">Build</button>
+      <button type="button" class="sap-cat" id="dSapCat-Transform" data-cat="Transform" aria-pressed="false">Transform</button>
+    </div>
+    <label for="dSapTask">SAP task</label>
+    <select id="dSapTask"></select>
+    <div class="row sap-row">
+      <div><label for="dSapModel">AI model</label><select id="dSapModel"></select></div>
+      <div><label for="dSapRuns">Runs per day</label><input id="dSapRuns" type="number" value="10" min="1"></div>
+    </div>
+    <button id="dSapGo" style="width:100%">Estimate SAP task</button>
+    <div id="dSapOut" style="display:none">
+      <div class="total" id="dSapLine" style="font-size:17px"></div>
+      <p class="note" id="dSapGuide"></p>
+      <p class="note" id="dSapProt"></p>
+    </div>
+    <p class="note" style="margin:14px 0 0">The Estimator tab prices all 21 tasks together as a monthly workload.</p>
+    <div style="margin-top:10px">
+      <button id="sapLibGo" class="ghostbtn" style="margin-top:0">Price these tasks in the Estimator →</button>
+    </div>
+  </div>
 
   <div class="card pg-panel" id="measures" role="tabpanel" style="margin-bottom:14px">
     <h2><span class="ic">ⓘ</span>What this measures, and what it doesn't</h2>
@@ -427,7 +463,7 @@
           <li><b style="color:var(--ink)">Input tokens</b>: the material handed to the model, counted. Exact for GPT models (the real o200k_base tokenizer); labelled estimates for other models, with the measured error published in ACCURACY.md.</li>
           <li><b style="color:var(--ink)">Predicted output tokens</b>: forecast from the type of task (summarise about 0.2x the input, extract 0.3x, draft 1.5x, code 2x, classify a fixed short label). A forecast, not a meter reading.</li>
           <li><b style="color:var(--ink)">Cost</b>: input plus predicted output, at the selected model's price, at your volume. Prices are editable defaults.</li>
-          <li><b style="color:var(--ink)">For the SAP edition</b>: 21 generic shapes of SAP work with typical input sizes, published in SAP-TASKS.md. No client data, no system data.</li>
+          <li><b style="color:var(--ink)">For the SAP workload</b>: 21 generic shapes of SAP work with typical input sizes, published in SAP-TASKS.md. No client data, no system data.</li>
         </ul>
       </div>
       <div>
@@ -444,7 +480,7 @@
   </div>
 
   <div class="valid" id="about">
-    <span>Proof checks: 165 / 165 passing (JavaScript 80 · SAP edition 3 · Python 82 — both engines reproduce the Workflows examples at historical and live prices, and share one price table and one counter)</span>
+    <span>Proof checks: 165 / 165 passing (JavaScript 80 · SAP workload 3 · Python 82 — both engines reproduce the Workflows examples at historical and live prices, and share one price table and one counter)</span>
     <span>GPT counts exact (o200k_base) · other models labelled estimates</span>
     <span>Accuracy method and error table: ACCURACY.md in the repo</span>
     <span>Status: public prototype · prices are editable defaults, verify before relying on a figure</span>
@@ -1044,7 +1080,7 @@ module.exports = { SAP_TASKS, estimateSapTask };
 
     $('kCost').textContent = money(selected);
     $('kCostSub').textContent = (routing === 'optimised' ? 'Optimised routing' : 'Baseline, single model') +
-      ' · SAP edition, ' + vol + ' runs/day × ' + days + ' days.';
+      ' · ' + vol + ' runs/day × ' + days + ' days.';
     $('kCheap').textContent = 'Claude Haiku 5.5';
     $('kCheapSub').textContent = money(cheap) + '/month if the whole workload ran on the fast tier. Price only; nothing here scores the answer.';
     $('kSave').innerHTML = money(save) + '<span class="badge">↓ ' + pct + '%</span>';
@@ -1840,15 +1876,75 @@ module.exports = {
   })();
 </script>
 <script>
+  // The SAP workload card (Insights tab): the same single-task SAP panel
+  // the app page carries — same task data (the page's own SAP_TASKS, the
+  // array the Estimator prices), same estimateSapTask computation, same
+  // rendering — so identical inputs give identical outputs on both pages.
+  // The footer button hands off to the Estimator tab, which prices all
+  // 21 tasks together as a monthly workload.
+  (function () {
+    if (typeof sap === 'undefined' || !sap.SAP_TASKS) return;
+    var sapSel = document.getElementById('dSapTask');
+    if (!sapSel) return;
+    function fillSapTasks(area) {
+      sapSel.innerHTML = '';
+      sap.SAP_TASKS.filter(function (tk) { return tk.area === area; }).forEach(function (tk) {
+        var o = document.createElement('option');
+        o.value = tk.id; o.textContent = tk.id + ' · ' + tk.area + ' — ' + tk.name;
+        sapSel.appendChild(o);
+      });
+      sapSel.selectedIndex = 0;
+    }
+    function setSapCat(area) {
+      document.querySelectorAll('#sapwork .sap-cat').forEach(function (b) {
+        var on = b.getAttribute('data-cat') === area;
+        b.className = 'sap-cat' + (on ? ' on' : '');
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+      fillSapTasks(area);
+    }
+    document.querySelectorAll('#sapwork .sap-cat').forEach(function (b) {
+      b.addEventListener('click', function () { setSapCat(b.getAttribute('data-cat')); });
+    });
+    setSapCat('Run');
+    var sapModelSel = document.getElementById('dSapModel');
+    Object.keys(core.MODELS).forEach(function (k) {
+      var o = document.createElement('option');
+      o.value = k; o.textContent = core.MODELS[k].label || k;
+      sapModelSel.appendChild(o);
+    });
+    function runSap() {
+      var runs = Math.max(1, parseInt(document.getElementById('dSapRuns').value || '1', 10));
+      var r = sap.estimateSapTask(sapSel.value, sapModelSel.value, runs);
+      document.getElementById('dSapLine').textContent =
+        r.task.name + ': ~' + r.task.typicalInputTokens.toLocaleString() + ' in / ' +
+        r.estimate.outputTokens + ' predicted out · $' + r.estimate.costPerRun.toFixed(4) +
+        '/run · $' + r.estimate.costPerMonth.toFixed(2) + '/month at ' + runs + '/day';
+      document.getElementById('dSapGuide').textContent = 'Guidance: ' + r.task.guidance;
+      document.getElementById('dSapProt').textContent = 'Protection: ' + r.task.protection;
+      document.getElementById('dSapOut').style.display = 'block';
+    }
+    document.getElementById('dSapGo').addEventListener('click', runSap);
+    runSap();
+    var go = document.getElementById('sapLibGo');
+    if (go) go.addEventListener('click', function () {
+      if (window.dashActivate) window.dashActivate('estimator', 'estimator');
+      var est = document.getElementById('estimator');
+      if (est) est.scrollIntoView();
+    });
+  })();
+</script>
+<script>
   (function () {
     var KEYS = ['estimator', 'workflows', 'minimiser', 'insights'];
     // Tab key -> the existing section element(s) it shows. Ids are the
-    // page's own. The Insights panel groups three cards in page order:
-    // Scenarios (#scenario), Models (#models) and About (#measures).
+    // page's own. The Insights panel groups four cards in page order:
+    // Scenarios (#scenario), Models (#models), the SAP workload
+    // (#sapwork) and About (#measures).
     // The Estimator panel is the KPI block + inputs + chart grid.
-    var PANELS = { estimator: ['estimator'], workflows: ['workflows'], minimiser: ['minimiser'], insights: ['scenario', 'models', 'measures'] };
-    // Every accepted hash resolves to a tab; #models and #about also
-    // scroll to their section inside the Insights panel.
+    var PANELS = { estimator: ['estimator'], workflows: ['workflows'], minimiser: ['minimiser'], insights: ['scenario', 'models', 'sapwork', 'measures'] };
+    // Every accepted hash resolves to a tab; #models, #sap and #about
+    // also scroll to their section inside the Insights panel.
     var ROUTES = {
       '': { tab: 'estimator' },
       'estimator': { tab: 'estimator' },
@@ -1858,6 +1954,7 @@ module.exports = {
       'scenario': { tab: 'insights' },
       'scenarios': { tab: 'insights' },
       'models': { tab: 'insights', scroll: 'models' },
+      'sap': { tab: 'insights', scroll: 'sapwork' },
       'measures': { tab: 'insights', scroll: 'measures' },
       'about': { tab: 'insights', scroll: 'measures' }
     };
